@@ -20,6 +20,19 @@ class SolicitudRepository(private val token: String) {
         }
     }
 
+    suspend fun getEstadoSolicitud(): Result<Solicitud> {
+        return try {
+            val response = api.getEstadoSolicitud()
+            if (response.isSuccessful && response.body() != null) {
+                Result.success(response.body()!!)
+            } else {
+                Result.failure(Exception("Sin solicitud"))
+            }
+        } catch (e: Exception) {
+            Result.failure(Exception("Error de conexión"))
+        }
+    }
+
     suspend fun getMisSolicitudes(): Result<List<Solicitud>> {
         return try {
             val response = api.getMisSolicitudes()

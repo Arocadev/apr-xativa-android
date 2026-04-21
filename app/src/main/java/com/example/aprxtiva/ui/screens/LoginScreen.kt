@@ -9,25 +9,30 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.aprxtiva.utils.IdiomaManager
 import com.example.aprxtiva.viewmodel.AuthViewModel
 import com.example.aprxtiva.viewmodel.LoginState
 
 @Composable
 fun LoginScreen(
-    onLoginSuccess: () -> Unit,
+    onLoginSuccess: (Boolean) -> Unit,
     onNavigateToRegister: () -> Unit,
     viewModel: AuthViewModel = viewModel()
 ) {
     var dni by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var mostrarMensajeContrasena by remember { mutableStateOf(false) }
     val loginState by viewModel.loginState.collectAsState()
+    val t = IdiomaManager.textos
 
     LaunchedEffect(loginState) {
         if (loginState is LoginState.Success) {
-            onLoginSuccess()
+            val activo = (loginState as LoginState.Success).activo
+            onLoginSuccess(activo)
         }
     }
 
@@ -38,14 +43,39 @@ fun LoginScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
+            listOf("val", "es", "en").forEach { idioma ->
+                TextButton(
+                    onClick = { IdiomaManager.idiomaActual = idioma },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = if (IdiomaManager.idiomaActual == idioma)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                ) {
+                    Text(
+                        text = idioma.uppercase(),
+                        fontWeight = if (IdiomaManager.idiomaActual == idioma)
+                            FontWeight.Bold else FontWeight.Normal
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         Text(
-            text = "APR Xàtiva",
+            text = t.loginTitulo,
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary
         )
         Text(
-            text = "Àrea de Prioritat Residencial",
+            text = t.loginSubtitulo,
             fontSize = 14.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(bottom = 40.dp)
@@ -54,7 +84,7 @@ fun LoginScreen(
         OutlinedTextField(
             value = dni,
             onValueChange = { dni = it.uppercase() },
-            label = { Text("DNI") },
+            label = { Text(t.dni) },
             placeholder = { Text("12345678A") },
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
@@ -65,7 +95,7 @@ fun LoginScreen(
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Contrasenya") },
+            label = { Text(t.contrasena) },
             singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -83,7 +113,32 @@ fun LoginScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        TextButton(
+            onClick = { mostrarMensajeContrasena = !mostrarMensajeContrasena },
+            modifier = Modifier.align(Alignment.End)
+        ) {
+            Text(t.olvidasteContrasena, fontSize = 13.sp)
+        }
+
+        if (mostrarMensajeContrasena) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                )
+            ) {
+                Text(
+                    text = t.olvidasteContrasenaMsg,
+                    modifier = Modifier.padding(12.dp),
+                    fontSize = 13.sp,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         Button(
             onClick = { viewModel.login(dni, password) },
@@ -96,14 +151,14 @@ fun LoginScreen(
                     color = MaterialTheme.colorScheme.onPrimary
                 )
             } else {
-                Text("Iniciar sessió")
+                Text(t.iniciarSesion)
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         TextButton(onClick = onNavigateToRegister) {
-            Text("No tens compte? Registra't")
+            Text(t.noTienesCuenta)
         }
     }
 }

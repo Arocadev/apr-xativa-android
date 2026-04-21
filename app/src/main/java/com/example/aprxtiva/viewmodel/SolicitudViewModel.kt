@@ -21,6 +21,19 @@ class SolicitudViewModel(application: Application) : AndroidViewModel(applicatio
     private val _estado = MutableStateFlow<EstadoUI>(EstadoUI.Idle)
     val estado: StateFlow<EstadoUI> = _estado
 
+    private val _estadoSolicitud = MutableStateFlow<Solicitud?>(null)
+    val estadoSolicitud: StateFlow<Solicitud?> = _estadoSolicitud
+
+    fun getEstadoSolicitud() {
+        viewModelScope.launch {
+            val token = tokenManager.token.first() ?: return@launch
+            val result = SolicitudRepository(token).getEstadoSolicitud()
+            if (result.isSuccess) {
+                _estadoSolicitud.value = result.getOrNull()
+            }
+        }
+    }
+
     fun cargarSolicitudes() {
         viewModelScope.launch {
             _estado.value = EstadoUI.Loading

@@ -7,7 +7,6 @@ import com.example.aprxtiva.repository.AuthRepository
 import com.example.aprxtiva.utils.TokenManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class AuthViewModel(application: Application) : AndroidViewModel(application) {
@@ -32,7 +31,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             if (result.isSuccess) {
                 val response = result.getOrNull()!!
                 tokenManager.guardarSesion(response.token, response.email, response.rol)
-                _loginState.value = LoginState.Success
+                _loginState.value = LoginState.Success(response.activo ?: true)
             } else {
                 _loginState.value = LoginState.Error(result.exceptionOrNull()?.message ?: "Error")
             }
@@ -69,7 +68,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
 sealed class LoginState {
     object Idle : LoginState()
     object Loading : LoginState()
-    object Success : LoginState()
+    data class Success(val activo: Boolean) : LoginState()
     data class Error(val message: String) : LoginState()
 }
 

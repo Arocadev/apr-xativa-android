@@ -37,6 +37,9 @@ interface ApiService {
     @GET("api/solicitudes/me")
     suspend fun getMisSolicitudes(): Response<List<Solicitud>>
 
+    @GET("api/solicitudes/estado")
+    suspend fun getEstadoSolicitud(): Response<Solicitud>
+
     // Derechos
     @GET("api/derechos")
     suspend fun getMisDerechos(): Response<List<DerechoAcceso>>

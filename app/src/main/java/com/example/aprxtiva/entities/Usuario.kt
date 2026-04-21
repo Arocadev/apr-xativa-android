@@ -19,7 +19,8 @@ data class LoginRequest(
 data class LoginResponse(
     val token: String,
     val email: String,
-    val rol: String
+    val rol: String,
+    val activo: Boolean = true
 )
 
 data class RegistroRequest(
