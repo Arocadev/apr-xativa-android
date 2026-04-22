@@ -6,7 +6,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.DirectionsCar
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
@@ -26,7 +25,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeScreen(
     onNavigateToVehiculos: () -> Unit,
-    onNavigateToSolicitudes: () -> Unit,
     onNavigateToDerechos: () -> Unit,
     onNavigateToPerfil: () -> Unit,
     onLogout: () -> Unit,
@@ -61,14 +59,12 @@ fun HomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(16.dp))
-
             Text(
                 text = "${t.bienvenido}!",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
             )
-
             email?.let {
                 Text(
                     text = it,
@@ -77,7 +73,6 @@ fun HomeScreen(
                     modifier = Modifier.padding(top = 4.dp, bottom = 32.dp)
                 )
             }
-
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -88,13 +83,6 @@ fun HomeScreen(
                         titulo = t.misVehiculos,
                         icono = Icons.Default.DirectionsCar,
                         onClick = onNavigateToVehiculos
-                    )
-                }
-                item {
-                    HomeCard(
-                        titulo = t.misSolicitudes,
-                        icono = Icons.Default.List,
-                        onClick = onNavigateToSolicitudes
                     )
                 }
                 item {

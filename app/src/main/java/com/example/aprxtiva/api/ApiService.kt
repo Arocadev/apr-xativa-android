@@ -3,6 +3,7 @@ package com.example.aprxtiva.api
 import com.example.aprxtiva.entities.*
 import retrofit2.Response
 import retrofit2.http.*
+import okhttp3.MultipartBody
 
 interface ApiService {
 
@@ -52,4 +53,8 @@ interface ApiService {
 
     @DELETE("api/derechos/{id}")
     suspend fun deleteDerechoAcceso(@Path("id") id: Long): Response<Void>
+
+    @Multipart
+    @POST("api/documentos/subir")
+    suspend fun subirDocumento(@Part archivo: MultipartBody.Part): Response<Void>
 }

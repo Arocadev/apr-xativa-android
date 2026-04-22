@@ -47,7 +47,7 @@ class MainActivity : ComponentActivity() {
                     composable("registro") {
                         RegisterScreen(
                             onRegistroSuccess = {
-                                navController.navigate("login") {
+                                navController.navigate("espera") {
                                     popUpTo("registro") { inclusive = true }
                                 }
                             },
@@ -76,7 +76,6 @@ class MainActivity : ComponentActivity() {
                     composable("home") {
                         HomeScreen(
                             onNavigateToVehiculos = { navController.navigate("vehiculos") },
-                            onNavigateToSolicitudes = { navController.navigate("solicitudes") },
                             onNavigateToDerechos = { navController.navigate("derechos") },
                             onNavigateToPerfil = { navController.navigate("perfil") },
                             onLogout = {
@@ -88,7 +87,6 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     composable("vehiculos") { }
-                    composable("solicitudes") { }
                     composable("derechos") { }
                     composable("perfil") { }
                 }
