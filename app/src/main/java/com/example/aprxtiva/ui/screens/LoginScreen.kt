@@ -19,7 +19,7 @@ import com.example.aprxtiva.viewmodel.LoginState
 
 @Composable
 fun LoginScreen(
-    onLoginSuccess: (Boolean) -> Unit,
+    onLoginSuccess: () -> Unit,
     onNavigateToRegister: () -> Unit,
     viewModel: AuthViewModel = viewModel()
 ) {
@@ -31,8 +31,7 @@ fun LoginScreen(
 
     LaunchedEffect(loginState) {
         if (loginState is LoginState.Success) {
-            val activo = (loginState as LoginState.Success).activo
-            onLoginSuccess(activo)
+            onLoginSuccess()
         }
     }
 

@@ -23,6 +23,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     val token = tokenManager.token
     val email = tokenManager.email
     val rol = tokenManager.rol
+    val activo = tokenManager.activo
 
     fun login(dni: String, password: String) {
         viewModelScope.launch {
@@ -30,7 +31,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             val result = repository.login(dni, password)
             if (result.isSuccess) {
                 val response = result.getOrNull()!!
-                tokenManager.guardarSesion(response.token, response.email, response.rol)
+                tokenManager.guardarSesion(response.token, response.email, response.rol, response.activo ?: true)
                 _loginState.value = LoginState.Success(response.activo ?: true)
             } else {
                 _loginState.value = LoginState.Error(result.exceptionOrNull()?.message ?: "Error")

@@ -10,7 +10,6 @@ import androidx.navigation.compose.rememberNavController
 import com.example.aprxtiva.ui.screens.*
 import com.example.aprxtiva.ui.theme.APRXativaTheme
 import com.example.aprxtiva.viewmodel.AuthViewModel
-import com.example.aprxtiva.viewmodel.SolicitudViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,7 +18,6 @@ class MainActivity : ComponentActivity() {
             APRXativaTheme {
                 val navController = rememberNavController()
                 val authViewModel: AuthViewModel = viewModel()
-                val solicitudViewModel: SolicitudViewModel = viewModel()
 
                 NavHost(
                     navController = navController,
@@ -27,15 +25,9 @@ class MainActivity : ComponentActivity() {
                 ) {
                     composable("login") {
                         LoginScreen(
-                            onLoginSuccess = { activo ->
-                                if (activo) {
-                                    navController.navigate("home") {
-                                        popUpTo("login") { inclusive = true }
-                                    }
-                                } else {
-                                    navController.navigate("espera") {
-                                        popUpTo("login") { inclusive = true }
-                                    }
+                            onLoginSuccess = {
+                                navController.navigate("home") {
+                                    popUpTo("login") { inclusive = true }
                                 }
                             },
                             onNavigateToRegister = {
@@ -47,7 +39,7 @@ class MainActivity : ComponentActivity() {
                     composable("registro") {
                         RegisterScreen(
                             onRegistroSuccess = {
-                                navController.navigate("espera") {
+                                navController.navigate("login") {
                                     popUpTo("registro") { inclusive = true }
                                 }
                             },
@@ -57,27 +49,12 @@ class MainActivity : ComponentActivity() {
                             viewModel = authViewModel
                         )
                     }
-                    composable("espera") {
-                        EsperaScreen(
-                            onLogout = {
-                                navController.navigate("login") {
-                                    popUpTo("espera") { inclusive = true }
-                                }
-                            },
-                            onAprobado = {
-                                navController.navigate("home") {
-                                    popUpTo("espera") { inclusive = true }
-                                }
-                            },
-                            authViewModel = authViewModel,
-                            solicitudViewModel = solicitudViewModel
-                        )
-                    }
                     composable("home") {
                         HomeScreen(
                             onNavigateToVehiculos = { navController.navigate("vehiculos") },
                             onNavigateToDerechos = { navController.navigate("derechos") },
                             onNavigateToPerfil = { navController.navigate("perfil") },
+                            onNavigateToAjustes = { navController.navigate("opciones") },
                             onLogout = {
                                 navController.navigate("login") {
                                     popUpTo("home") { inclusive = true }
@@ -86,9 +63,38 @@ class MainActivity : ComponentActivity() {
                             viewModel = authViewModel
                         )
                     }
-                    composable("vehiculos") { }
-                    composable("derechos") { }
-                    composable("perfil") { }
+                    composable("vehiculos") {
+                        VehiculosScreen(
+                            onVolver = { navController.popBackStack() }
+                        )
+                    }
+                    composable("derechos") {
+                        DerechosScreen(
+                            onVolver = { navController.popBackStack() }
+                        )
+                    }
+                    composable("perfil") {
+                        PerfilScreen(
+                            onVolver = { navController.popBackStack() },
+                            onLogout = {
+                                navController.navigate("login") {
+                                    popUpTo("home") { inclusive = true }
+                                }
+                            },
+                            viewModel = authViewModel
+                        )
+                    }
+                    composable("opciones") {
+                        OpcionesScreen(
+                            onVolver = { navController.popBackStack() },
+                            onLogout = {
+                                navController.navigate("login") {
+                                    popUpTo("home") { inclusive = true }
+                                }
+                            },
+                            viewModel = authViewModel
+                        )
+                    }
                 }
             }
         }

@@ -3,6 +3,7 @@ package com.example.aprxtiva.utils
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -17,17 +18,20 @@ class TokenManager(private val context: Context) {
         val TOKEN_KEY = stringPreferencesKey("token")
         val EMAIL_KEY = stringPreferencesKey("email")
         val ROL_KEY = stringPreferencesKey("rol")
+        val ACTIVO_KEY = booleanPreferencesKey("activo")
     }
 
     val token: Flow<String?> = context.dataStore.data.map { it[TOKEN_KEY] }
     val email: Flow<String?> = context.dataStore.data.map { it[EMAIL_KEY] }
     val rol: Flow<String?> = context.dataStore.data.map { it[ROL_KEY] }
+    val activo: Flow<Boolean> = context.dataStore.data.map { it[ACTIVO_KEY] ?: true }
 
-    suspend fun guardarSesion(token: String, email: String, rol: String) {
+    suspend fun guardarSesion(token: String, email: String, rol: String, activo: Boolean) {
         context.dataStore.edit {
             it[TOKEN_KEY] = token
             it[EMAIL_KEY] = email
             it[ROL_KEY] = rol
+            it[ACTIVO_KEY] = activo
         }
     }
 
@@ -36,6 +40,7 @@ class TokenManager(private val context: Context) {
             it.remove(TOKEN_KEY)
             it.remove(EMAIL_KEY)
             it.remove(ROL_KEY)
+            it.remove(ACTIVO_KEY)
         }
     }
 }

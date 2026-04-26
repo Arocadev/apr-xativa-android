@@ -48,7 +48,33 @@ fun RegisterScreen(
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Selector de idioma
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
+            listOf("val", "es", "en").forEach { idioma ->
+                TextButton(
+                    onClick = { IdiomaManager.idiomaActual = idioma },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = if (IdiomaManager.idiomaActual == idioma)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                ) {
+                    Text(
+                        text = idioma.uppercase(),
+                        fontWeight = if (IdiomaManager.idiomaActual == idioma)
+                            FontWeight.Bold else FontWeight.Normal
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         Text(
             text = t.registroTitulo,
@@ -152,22 +178,6 @@ fun RegisterScreen(
             )
         }
 
-        if (registroState is RegistroState.Success) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                )
-            ) {
-                Text(
-                    text = t.registroExito,
-                    modifier = Modifier.padding(12.dp),
-                    fontSize = 13.sp,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            }
-        }
-
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
@@ -192,5 +202,7 @@ fun RegisterScreen(
         TextButton(onClick = onNavigateToLogin) {
             Text(t.yaTienesCuenta)
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }
