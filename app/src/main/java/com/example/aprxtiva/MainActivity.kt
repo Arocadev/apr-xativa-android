@@ -3,6 +3,9 @@ package com.example.aprxtiva
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -12,12 +15,15 @@ import com.example.aprxtiva.ui.theme.APRXativaTheme
 import com.example.aprxtiva.viewmodel.AuthViewModel
 
 class MainActivity : ComponentActivity() {
+    @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             APRXativaTheme {
                 val navController = rememberNavController()
                 val authViewModel: AuthViewModel = viewModel()
+                val windowSizeClass = calculateWindowSizeClass(this)
+                val esLandscape = windowSizeClass.widthSizeClass != WindowWidthSizeClass.Compact
 
                 NavHost(
                     navController = navController,
@@ -33,6 +39,7 @@ class MainActivity : ComponentActivity() {
                             onNavigateToRegister = {
                                 navController.navigate("registro")
                             },
+                            esLandscape = esLandscape,
                             viewModel = authViewModel
                         )
                     }
@@ -60,7 +67,8 @@ class MainActivity : ComponentActivity() {
                                     popUpTo("home") { inclusive = true }
                                 }
                             },
-                            viewModel = authViewModel
+                            viewModel = authViewModel,
+                            esLandscape = esLandscape
                         )
                     }
                     composable("vehiculos") {

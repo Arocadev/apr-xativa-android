@@ -6,6 +6,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.DirectionsCar
@@ -41,6 +43,7 @@ fun HomeScreen(
     onNavigateToPerfil: () -> Unit,
     onNavigateToAjustes: () -> Unit,
     onLogout: () -> Unit,
+    esLandscape: Boolean = false,
     viewModel: AuthViewModel = viewModel()
 ) {
     val t = IdiomaManager.textos
@@ -71,7 +74,7 @@ fun HomeScreen(
                 title = { Text("APR Xàtiva", fontWeight = FontWeight.Bold) },
                 actions = {
                     IconButton(onClick = onNavigateToAjustes) {
-                        Icon(Icons.Default.Settings, contentDescription = "Ajustos")
+                        Icon(Icons.Default.Settings, contentDescription = t.ajustes)
                     }
                     IconButton(onClick = {
                         scope.launch {
@@ -89,7 +92,8 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(24.dp),
+                .padding(24.dp)
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             if (!activo) {
@@ -111,7 +115,6 @@ fun HomeScreen(
                             color = Color(0xFF856404)
                         )
                         Spacer(modifier = Modifier.height(12.dp))
-
                         if (documentoSubido) {
                             Text(
                                 text = "✅ Document enviat. L'administrador el revisarà prompte.",
@@ -128,7 +131,6 @@ fun HomeScreen(
                                     fontSize = 13.sp
                                 )
                             }
-
                             if (nombreArchivo.isNotEmpty()) {
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Button(
@@ -145,11 +147,8 @@ fun HomeScreen(
                                                     val requestBody = bytes.toRequestBody(mimeType.toMediaTypeOrNull())
                                                     val part = MultipartBody.Part.createFormData("archivo", nombreArchivo, requestBody)
                                                     val result = DocumentoRepository(token).subirDocumento(part)
-                                                    if (result.isSuccess) {
-                                                        documentoSubido = true
-                                                    } else {
-                                                        errorEnvio = "Error en enviar el document"
-                                                    }
+                                                    if (result.isSuccess) documentoSubido = true
+                                                    else errorEnvio = "Error en enviar el document"
                                                 } catch (e: Exception) {
                                                     errorEnvio = t.errorConexion
                                                 } finally {
@@ -169,7 +168,6 @@ fun HomeScreen(
                                     }
                                 }
                             }
-
                             if (errorEnvio.isNotEmpty()) {
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(text = errorEnvio, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
@@ -199,7 +197,8 @@ fun HomeScreen(
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier.height(400.dp)
             ) {
                 item {
                     HomeCard(

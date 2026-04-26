@@ -1,24 +1,26 @@
 package com.example.aprxtiva.ui.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.aprxtiva.api.RetrofitClient
+import com.example.aprxtiva.entities.CambiarPasswordRequest
 import com.example.aprxtiva.utils.IdiomaManager
 import com.example.aprxtiva.utils.TokenManager
 import com.example.aprxtiva.viewmodel.AuthViewModel
-import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import com.example.aprxtiva.api.RetrofitClient
-import com.example.aprxtiva.entities.CambiarPasswordRequest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,6 +59,7 @@ fun PerfilScreen(
                 .fillMaxSize()
                 .padding(padding)
                 .padding(24.dp)
+                .verticalScroll(rememberScrollState())
         ) {
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp)) {
@@ -81,7 +84,6 @@ fun PerfilScreen(
                         fontSize = 16.sp,
                         modifier = Modifier.padding(bottom = 12.dp)
                     )
-
                     OutlinedTextField(
                         value = passwordActual,
                         onValueChange = { passwordActual = it },
@@ -90,9 +92,7 @@ fun PerfilScreen(
                         visualTransformation = PasswordVisualTransformation(),
                         modifier = Modifier.fillMaxWidth()
                     )
-
                     Spacer(modifier = Modifier.height(8.dp))
-
                     OutlinedTextField(
                         value = passwordNueva,
                         onValueChange = { passwordNueva = it },
@@ -101,9 +101,7 @@ fun PerfilScreen(
                         visualTransformation = PasswordVisualTransformation(),
                         modifier = Modifier.fillMaxWidth()
                     )
-
                     Spacer(modifier = Modifier.height(8.dp))
-
                     OutlinedTextField(
                         value = passwordConfirm,
                         onValueChange = { passwordConfirm = it },
@@ -112,19 +110,15 @@ fun PerfilScreen(
                         visualTransformation = PasswordVisualTransformation(),
                         modifier = Modifier.fillMaxWidth()
                     )
-
                     if (error.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(text = error, color = MaterialTheme.colorScheme.error, fontSize = 13.sp)
                     }
-
                     if (exito.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(text = exito, color = MaterialTheme.colorScheme.primary, fontSize = 13.sp)
                     }
-
                     Spacer(modifier = Modifier.height(12.dp))
-
                     Button(
                         onClick = {
                             error = ""

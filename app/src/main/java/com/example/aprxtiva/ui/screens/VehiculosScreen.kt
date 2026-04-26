@@ -1,8 +1,8 @@
 package com.example.aprxtiva.ui.screens
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
@@ -54,6 +54,7 @@ fun VehiculosScreen(
                 .fillMaxSize()
                 .padding(padding)
                 .padding(16.dp)
+                .verticalScroll(rememberScrollState())
         ) {
             Button(
                 onClick = { mostrarFormulario = !mostrarFormulario },
@@ -132,8 +133,8 @@ fun VehiculosScreen(
                     }
                 }
                 else -> {
-                    LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        items(vehiculos) { vehiculo ->
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        vehiculos.forEach { vehiculo ->
                             VehiculoCard(
                                 vehiculo = vehiculo,
                                 confirmandoId = confirmandoId,
@@ -170,16 +171,8 @@ fun VehiculoCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
-                    Text(
-                        text = vehiculo.matricula,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                    )
-                    Text(
-                        text = vehiculo.tipoAcred,
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Text(text = vehiculo.matricula, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Text(text = vehiculo.tipoAcred, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 Text(
                     text = if (vehiculo.activo) t.activo else t.inactivo,

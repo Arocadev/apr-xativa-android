@@ -1,8 +1,8 @@
 package com.example.aprxtiva.ui.screens
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
@@ -59,6 +59,7 @@ fun DerechosScreen(
                 .fillMaxSize()
                 .padding(padding)
                 .padding(16.dp)
+                .verticalScroll(rememberScrollState())
         ) {
             Button(
                 onClick = { mostrarFormulario = !mostrarFormulario },
@@ -71,7 +72,6 @@ fun DerechosScreen(
                 Spacer(modifier = Modifier.height(12.dp))
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(16.dp)) {
-
                         ExposedDropdownMenuBox(
                             expanded = expandedTipo,
                             onExpandedChange = { expandedTipo = !expandedTipo }
@@ -99,9 +99,7 @@ fun DerechosScreen(
                                 }
                             }
                         }
-
                         Spacer(modifier = Modifier.height(8.dp))
-
                         OutlinedTextField(
                             value = vehiculoId,
                             onValueChange = { vehiculoId = it },
@@ -109,9 +107,7 @@ fun DerechosScreen(
                             singleLine = true,
                             modifier = Modifier.fillMaxWidth()
                         )
-
                         Spacer(modifier = Modifier.height(8.dp))
-
                         ExposedDropdownMenuBox(
                             expanded = expandedAcred,
                             onExpandedChange = { expandedAcred = !expandedAcred }
@@ -139,9 +135,7 @@ fun DerechosScreen(
                                 }
                             }
                         }
-
                         Spacer(modifier = Modifier.height(8.dp))
-
                         if (tipoDerecho == "PERMANENTE") {
                             OutlinedTextField(
                                 value = fechaInicio,
@@ -167,9 +161,7 @@ fun DerechosScreen(
                                 modifier = Modifier.fillMaxWidth()
                             )
                         }
-
                         Spacer(modifier = Modifier.height(12.dp))
-
                         Button(
                             onClick = {
                                 val id = vehiculoId.toLongOrNull() ?: return@Button
@@ -206,8 +198,8 @@ fun DerechosScreen(
                     }
                 }
                 else -> {
-                    LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        items(derechos) { derecho ->
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        derechos.forEach { derecho ->
                             DerechoCard(derecho = derecho, t = t)
                         }
                     }
@@ -225,33 +217,17 @@ fun DerechoCard(derecho: DerechoAcceso, t: Textos) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = derecho.matricula,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
-                )
+                Text(text = derecho.matricula, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 Text(
                     text = if (derecho.activo) t.activo else t.inactivo,
                     fontSize = 12.sp,
                     color = if (derecho.activo) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
                 )
             }
-            Text(
-                text = derecho.tipoDerecho,
-                fontSize = 13.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Text(
-                text = "${t.fechaInicio}: ${derecho.fechaInicio}",
-                fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Text(text = derecho.tipoDerecho, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(text = "${t.fechaInicio}: ${derecho.fechaInicio}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             if (derecho.fechaFin.isNotEmpty()) {
-                Text(
-                    text = "${t.fechaFin}: ${derecho.fechaFin}",
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Text(text = "${t.fechaFin}: ${derecho.fechaFin}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }

@@ -1,7 +1,9 @@
 package com.example.aprxtiva.ui.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,6 +23,7 @@ import com.example.aprxtiva.viewmodel.LoginState
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
     onNavigateToRegister: () -> Unit,
+    esLandscape: Boolean = false,
     viewModel: AuthViewModel = viewModel()
 ) {
     var dni by remember { mutableStateOf("") }
@@ -38,7 +41,8 @@ fun LoginScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .padding(24.dp)
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -64,9 +68,7 @@ fun LoginScreen(
                 }
             }
         }
-
         Spacer(modifier = Modifier.height(16.dp))
-
         Text(
             text = t.loginTitulo,
             fontSize = 32.sp,
@@ -79,7 +81,6 @@ fun LoginScreen(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(bottom = 40.dp)
         )
-
         OutlinedTextField(
             value = dni,
             onValueChange = { dni = it.uppercase() },
@@ -88,9 +89,7 @@ fun LoginScreen(
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
-
         Spacer(modifier = Modifier.height(16.dp))
-
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
@@ -100,9 +99,7 @@ fun LoginScreen(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             modifier = Modifier.fillMaxWidth()
         )
-
         Spacer(modifier = Modifier.height(8.dp))
-
         if (loginState is LoginState.Error) {
             Text(
                 text = (loginState as LoginState.Error).message,
@@ -111,14 +108,12 @@ fun LoginScreen(
                 modifier = Modifier.padding(vertical = 4.dp)
             )
         }
-
         TextButton(
             onClick = { mostrarMensajeContrasena = !mostrarMensajeContrasena },
             modifier = Modifier.align(Alignment.End)
         ) {
             Text(t.olvidasteContrasena, fontSize = 13.sp)
         }
-
         if (mostrarMensajeContrasena) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -136,9 +131,7 @@ fun LoginScreen(
             }
             Spacer(modifier = Modifier.height(8.dp))
         }
-
         Spacer(modifier = Modifier.height(16.dp))
-
         Button(
             onClick = { viewModel.login(dni, password) },
             modifier = Modifier.fillMaxWidth(),
@@ -153,9 +146,7 @@ fun LoginScreen(
                 Text(t.iniciarSesion)
             }
         }
-
         Spacer(modifier = Modifier.height(16.dp))
-
         TextButton(onClick = onNavigateToRegister) {
             Text(t.noTienesCuenta)
         }

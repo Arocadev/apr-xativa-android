@@ -1,6 +1,8 @@
 package com.example.aprxtiva.ui.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
@@ -10,9 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.aprxtiva.utils.IdiomaManager
-import com.example.aprxtiva.ui.theme.TemaManager
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.aprxtiva.ui.theme.TemaManager
+import com.example.aprxtiva.utils.IdiomaManager
 import com.example.aprxtiva.viewmodel.AuthViewModel
 import kotlinx.coroutines.launch
 
@@ -42,10 +44,10 @@ fun OpcionesScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp),
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Idioma
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
@@ -70,7 +72,6 @@ fun OpcionesScreen(
                 }
             }
 
-            // Modo oscuro
             Card(modifier = Modifier.fillMaxWidth()) {
                 Row(
                     modifier = Modifier
@@ -91,7 +92,6 @@ fun OpcionesScreen(
                 }
             }
 
-            // Acerca de
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
@@ -108,9 +108,6 @@ fun OpcionesScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.weight(1f))
-
-            // Cerrar sesión
             Button(
                 onClick = {
                     scope.launch {
