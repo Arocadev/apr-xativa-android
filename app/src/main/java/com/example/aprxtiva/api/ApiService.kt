@@ -46,14 +46,15 @@ interface ApiService {
     suspend fun getMisDerechos(): Response<List<DerechoAcceso>>
 
     @POST("api/derechos/permanente")
-    suspend fun crearDerechoPermanente(@Body request: DerechoPermanenteRequest): Response<DerechoAcceso>
+    suspend fun crearDerechoPermanente(@Body request: Map<String, String>): Response<DerechoAcceso>
 
-    @POST("api/derechos/puntual")
-    suspend fun crearDerechoPuntual(@Body request: DerechoPuntualRequest): Response<DerechoAcceso>
+    @POST("api/derechos/puntual/invitado")
+    suspend fun crearDerechoPuntualInvitado(@Body request: Map<String, String>): Response<DerechoAcceso>
 
     @DELETE("api/derechos/{id}")
     suspend fun deleteDerechoAcceso(@Path("id") id: Long): Response<Void>
 
+    // Documentos
     @Multipart
     @POST("api/documentos/subir")
     suspend fun subirDocumento(@Part archivo: MultipartBody.Part): Response<Void>

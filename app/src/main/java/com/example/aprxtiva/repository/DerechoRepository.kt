@@ -2,8 +2,6 @@ package com.example.aprxtiva.repository
 
 import com.example.aprxtiva.api.RetrofitClient
 import com.example.aprxtiva.entities.DerechoAcceso
-import com.example.aprxtiva.entities.DerechoPermanenteRequest
-import com.example.aprxtiva.entities.DerechoPuntualRequest
 
 class DerechoRepository(private val token: String) {
 
@@ -22,15 +20,10 @@ class DerechoRepository(private val token: String) {
         }
     }
 
-    suspend fun crearDerechoPermanente(
-        vehiculoId: Long,
-        tipoAcred: String,
-        fechaInicio: String,
-        fechaFin: String
-    ): Result<DerechoAcceso> {
+    suspend fun crearDerechoPermanente(vehiculoId: Long): Result<DerechoAcceso> {
         return try {
             val response = api.crearDerechoPermanente(
-                DerechoPermanenteRequest(vehiculoId, tipoAcred, fechaInicio, fechaFin)
+                mapOf("vehiculoId" to vehiculoId.toString())
             )
             if (response.isSuccessful && response.body() != null) {
                 Result.success(response.body()!!)
@@ -42,14 +35,13 @@ class DerechoRepository(private val token: String) {
         }
     }
 
-    suspend fun crearDerechoPuntual(
-        vehiculoId: Long,
-        tipoAcred: String,
-        fechaAcceso: String
+    suspend fun crearDerechoPuntualInvitado(
+        matricula: String,
+        fecha: String
     ): Result<DerechoAcceso> {
         return try {
-            val response = api.crearDerechoPuntual(
-                DerechoPuntualRequest(vehiculoId, tipoAcred, fechaAcceso)
+            val response = api.crearDerechoPuntualInvitado(
+                mapOf("matricula" to matricula, "fecha" to fecha)
             )
             if (response.isSuccessful && response.body() != null) {
                 Result.success(response.body()!!)

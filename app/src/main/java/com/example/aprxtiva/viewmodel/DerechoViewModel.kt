@@ -35,11 +35,11 @@ class DerechoViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun crearDerechoPermanente(vehiculoId: Long, tipoAcred: String, fechaInicio: String, fechaFin: String) {
+    fun crearDerechoPermanente(vehiculoId: Long) {
         viewModelScope.launch {
             _estado.value = EstadoUI.Loading
             val token = tokenManager.token.first() ?: return@launch
-            val result = DerechoRepository(token).crearDerechoPermanente(vehiculoId, tipoAcred, fechaInicio, fechaFin)
+            val result = DerechoRepository(token).crearDerechoPermanente(vehiculoId)
             if (result.isSuccess) {
                 cargarDerechos()
             } else {
@@ -48,11 +48,11 @@ class DerechoViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun crearDerechoPuntual(vehiculoId: Long, tipoAcred: String, fechaAcceso: String) {
+    fun crearDerechoPuntualInvitado(matricula: String, fecha: String) {
         viewModelScope.launch {
             _estado.value = EstadoUI.Loading
             val token = tokenManager.token.first() ?: return@launch
-            val result = DerechoRepository(token).crearDerechoPuntual(vehiculoId, tipoAcred, fechaAcceso)
+            val result = DerechoRepository(token).crearDerechoPuntualInvitado(matricula, fecha)
             if (result.isSuccess) {
                 cargarDerechos()
             } else {
