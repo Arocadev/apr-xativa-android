@@ -85,7 +85,6 @@ fun LoginScreen(
             value = dni,
             onValueChange = { dni = it.uppercase() },
             label = { Text(t.dni) },
-            placeholder = { Text("12345678A") },
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )

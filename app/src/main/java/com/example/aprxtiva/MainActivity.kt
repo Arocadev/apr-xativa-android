@@ -111,7 +111,13 @@ class MainActivity : ComponentActivity() {
                                     popUpTo("home") { inclusive = true }
                                 }
                             },
+                            onGuia = { navController.navigate("guia") },
                             viewModel = authViewModel
+                        )
+                    }
+                    composable("guia") {
+                        GuiaScreen(
+                            onVolver = { navController.popBackStack() }
                         )
                     }
                 }

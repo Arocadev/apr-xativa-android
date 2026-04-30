@@ -5,6 +5,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -32,9 +33,21 @@ fun VehiculosScreen(
     var tipoAcred by remember { mutableStateOf("LIBRE") }
     var expandedTipo by remember { mutableStateOf(false) }
     var confirmandoId by remember { mutableStateOf<Long?>(null) }
+    var mostrarInfoTipoAcred by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        viewModel.cargarVehiculos()
+    LaunchedEffect(Unit) { viewModel.cargarVehiculos() }
+
+    if (mostrarInfoTipoAcred) {
+        AlertDialog(
+            onDismissRequest = { mostrarInfoTipoAcred = false },
+            title = { Text(t.tipoAcred, fontWeight = FontWeight.Bold) },
+            text = { Text(t.infoTipoAcred, lineHeight = 22.sp) },
+            confirmButton = {
+                TextButton(onClick = { mostrarInfoTipoAcred = false }) {
+                    Text(t.cancelar)
+                }
+            }
+        )
     }
 
     Scaffold(
@@ -75,31 +88,44 @@ fun VehiculosScreen(
                             modifier = Modifier.fillMaxWidth()
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        ExposedDropdownMenuBox(
-                            expanded = expandedTipo,
-                            onExpandedChange = { expandedTipo = !expandedTipo }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            OutlinedTextField(
-                                value = tipoAcred,
-                                onValueChange = {},
-                                readOnly = true,
-                                label = { Text(t.tipoAcred) },
-                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedTipo) },
-                                modifier = Modifier.fillMaxWidth().menuAnchor()
-                            )
-                            ExposedDropdownMenu(
+                            ExposedDropdownMenuBox(
                                 expanded = expandedTipo,
-                                onDismissRequest = { expandedTipo = false }
+                                onExpandedChange = { expandedTipo = !expandedTipo },
+                                modifier = Modifier.weight(1f)
                             ) {
-                                listOf("LIBRE", "ACREDITADO").forEach { opcion ->
-                                    DropdownMenuItem(
-                                        text = { Text(opcion) },
-                                        onClick = {
-                                            tipoAcred = opcion
-                                            expandedTipo = false
-                                        }
-                                    )
+                                OutlinedTextField(
+                                    value = tipoAcred,
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    label = { Text(t.tipoAcred) },
+                                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedTipo) },
+                                    modifier = Modifier.fillMaxWidth().menuAnchor()
+                                )
+                                ExposedDropdownMenu(
+                                    expanded = expandedTipo,
+                                    onDismissRequest = { expandedTipo = false }
+                                ) {
+                                    listOf("LIBRE", "ACREDITADO").forEach { opcion ->
+                                        DropdownMenuItem(
+                                            text = { Text(opcion) },
+                                            onClick = {
+                                                tipoAcred = opcion
+                                                expandedTipo = false
+                                            }
+                                        )
+                                    }
                                 }
+                            }
+                            IconButton(onClick = { mostrarInfoTipoAcred = true }) {
+                                Icon(
+                                    Icons.Default.Info,
+                                    contentDescription = "Info",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
                             }
                         }
                         Spacer(modifier = Modifier.height(12.dp))
@@ -186,21 +212,15 @@ fun VehiculoCard(
                     Button(
                         onClick = { onEliminar(vehiculo.id) },
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-                    ) {
-                        Text(t.confirmar)
-                    }
-                    OutlinedButton(onClick = onCancelar) {
-                        Text(t.cancelar)
-                    }
+                    ) { Text(t.confirmar) }
+                    OutlinedButton(onClick = onCancelar) { Text(t.cancelar) }
                 }
             } else {
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedButton(
                     onClick = { onConfirmarEliminar(vehiculo.id) },
                     modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(t.eliminar)
-                }
+                ) { Text(t.eliminar) }
             }
         }
     }

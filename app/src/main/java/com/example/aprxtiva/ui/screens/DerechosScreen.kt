@@ -6,6 +6,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -44,6 +45,8 @@ fun DerechosScreen(
     var matriculaInvitado by remember { mutableStateOf("") }
     var fechaAcceso by remember { mutableStateOf("") }
     var mostrarDatePicker by remember { mutableStateOf(false) }
+    var mostrarInfoTipoDerecho by remember { mutableStateOf(false) }
+    var mostrarInfoFechaPuntual by remember { mutableStateOf(false) }
 
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = System.currentTimeMillis(),
@@ -87,6 +90,32 @@ fun DerechosScreen(
         }
     }
 
+    if (mostrarInfoTipoDerecho) {
+        AlertDialog(
+            onDismissRequest = { mostrarInfoTipoDerecho = false },
+            title = { Text(t.tipoDerecho, fontWeight = FontWeight.Bold) },
+            text = { Text(t.infoTipoDerecho, lineHeight = 22.sp) },
+            confirmButton = {
+                TextButton(onClick = { mostrarInfoTipoDerecho = false }) {
+                    Text(t.cancelar)
+                }
+            }
+        )
+    }
+
+    if (mostrarInfoFechaPuntual) {
+        AlertDialog(
+            onDismissRequest = { mostrarInfoFechaPuntual = false },
+            title = { Text(t.fecha, fontWeight = FontWeight.Bold) },
+            text = { Text(t.infoDerechoPuntual, lineHeight = 22.sp) },
+            confirmButton = {
+                TextButton(onClick = { mostrarInfoFechaPuntual = false }) {
+                    Text(t.cancelar)
+                }
+            }
+        )
+    }
+
     LaunchedEffect(Unit) {
         viewModel.cargarDerechos()
         vehiculoViewModel.cargarVehiculos()
@@ -123,34 +152,47 @@ fun DerechosScreen(
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(16.dp)) {
 
-                        ExposedDropdownMenuBox(
-                            expanded = expandedTipo,
-                            onExpandedChange = { expandedTipo = !expandedTipo }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            OutlinedTextField(
-                                value = tipoDerecho,
-                                onValueChange = {},
-                                readOnly = true,
-                                label = { Text(t.tipoDerecho) },
-                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedTipo) },
-                                modifier = Modifier.fillMaxWidth().menuAnchor()
-                            )
-                            ExposedDropdownMenu(
+                            ExposedDropdownMenuBox(
                                 expanded = expandedTipo,
-                                onDismissRequest = { expandedTipo = false }
+                                onExpandedChange = { expandedTipo = !expandedTipo },
+                                modifier = Modifier.weight(1f)
                             ) {
-                                listOf("PERMANENTE", "PUNTUAL").forEach { opcion ->
-                                    DropdownMenuItem(
-                                        text = { Text(opcion) },
-                                        onClick = {
-                                            tipoDerecho = opcion
-                                            expandedTipo = false
-                                            vehiculoSeleccionado = null
-                                            matriculaInvitado = ""
-                                            fechaAcceso = ""
-                                        }
-                                    )
+                                OutlinedTextField(
+                                    value = tipoDerecho,
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    label = { Text(t.tipoDerecho) },
+                                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedTipo) },
+                                    modifier = Modifier.fillMaxWidth().menuAnchor()
+                                )
+                                ExposedDropdownMenu(
+                                    expanded = expandedTipo,
+                                    onDismissRequest = { expandedTipo = false }
+                                ) {
+                                    listOf("PERMANENTE", "PUNTUAL").forEach { opcion ->
+                                        DropdownMenuItem(
+                                            text = { Text(opcion) },
+                                            onClick = {
+                                                tipoDerecho = opcion
+                                                expandedTipo = false
+                                                vehiculoSeleccionado = null
+                                                matriculaInvitado = ""
+                                                fechaAcceso = ""
+                                            }
+                                        )
+                                    }
                                 }
+                            }
+                            IconButton(onClick = { mostrarInfoTipoDerecho = true }) {
+                                Icon(
+                                    Icons.Default.Info,
+                                    contentDescription = "Info",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
                             }
                         }
 
@@ -166,7 +208,6 @@ fun DerechosScreen(
                                     onValueChange = {},
                                     readOnly = true,
                                     label = { Text(t.matricula) },
-                                    placeholder = { Text("Selecciona un vehicle") },
                                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedVehiculo) },
                                     modifier = Modifier.fillMaxWidth().menuAnchor()
                                 )
@@ -214,29 +255,39 @@ fun DerechosScreen(
                                 value = matriculaInvitado,
                                 onValueChange = { matriculaInvitado = it.uppercase() },
                                 label = { Text(t.matricula) },
-                                placeholder = { Text("1234ABC") },
                                 singleLine = true,
                                 modifier = Modifier.fillMaxWidth()
                             )
 
                             Spacer(modifier = Modifier.height(8.dp))
 
-                            OutlinedTextField(
-                                value = if (fechaAcceso.isEmpty()) "" else {
-                                    val parts = fechaAcceso.split("-")
-                                    if (parts.size == 3) "${parts[2]}/${parts[1]}/${parts[0]}" else fechaAcceso
-                                },
-                                onValueChange = {},
-                                readOnly = true,
-                                label = { Text(t.fecha) },
-                                placeholder = { Text("dd/MM/yyyy") },
-                                trailingIcon = {
-                                    IconButton(onClick = { mostrarDatePicker = true }) {
-                                        Icon(Icons.Default.DateRange, contentDescription = t.fecha)
-                                    }
-                                },
-                                modifier = Modifier.fillMaxWidth()
-                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                OutlinedTextField(
+                                    value = if (fechaAcceso.isEmpty()) "" else {
+                                        val parts = fechaAcceso.split("-")
+                                        if (parts.size == 3) "${parts[2]}/${parts[1]}/${parts[0]}" else fechaAcceso
+                                    },
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    label = { Text(t.fecha) },
+                                    trailingIcon = {
+                                        IconButton(onClick = { mostrarDatePicker = true }) {
+                                            Icon(Icons.Default.DateRange, contentDescription = t.fecha)
+                                        }
+                                    },
+                                    modifier = Modifier.weight(1f)
+                                )
+                                IconButton(onClick = { mostrarInfoFechaPuntual = true }) {
+                                    Icon(
+                                        Icons.Default.Info,
+                                        contentDescription = "Info",
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            }
 
                             Spacer(modifier = Modifier.height(12.dp))
 

@@ -9,6 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -23,6 +24,7 @@ import kotlinx.coroutines.launch
 fun OpcionesScreen(
     onVolver: () -> Unit,
     onLogout: () -> Unit,
+    onGuia: () -> Unit,
     viewModel: AuthViewModel = viewModel()
 ) {
     val t = IdiomaManager.textos
@@ -106,6 +108,14 @@ fun OpcionesScreen(
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(text = "Ajuntament de Xàtiva · 962 279 000", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
+            }
+
+            Button(
+                onClick = onGuia,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC0392B))
+            ) {
+                Text("📖  ${t.guia}", fontSize = 16.sp)
             }
 
             Button(

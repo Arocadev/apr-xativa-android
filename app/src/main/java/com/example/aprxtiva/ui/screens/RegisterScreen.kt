@@ -3,6 +3,8 @@ package com.example.aprxtiva.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,15 +32,29 @@ fun RegisterScreen(
     var password by remember { mutableStateOf("") }
     var tipo by remember { mutableStateOf("A.1") }
     var expandedTipo by remember { mutableStateOf(false) }
+    var mostrarInfoTipo by remember { mutableStateOf(false) }
     val registroState by viewModel.registroState.collectAsState()
     val t = IdiomaManager.textos
 
-    val tipos = listOf("A.1", "A.2", "A.3", "B", "C", "D", "E", "F", "G", "H.1", "H.2", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S")
+    val tipos = listOf("A.1", "A.2", "A.3", "B", "C", "D", "E", "F", "G", "H.1", "H.2")
 
     LaunchedEffect(registroState) {
         if (registroState is RegistroState.Success) {
             onRegistroSuccess()
         }
+    }
+
+    if (mostrarInfoTipo) {
+        AlertDialog(
+            onDismissRequest = { mostrarInfoTipo = false },
+            title = { Text(t.tipo, fontWeight = FontWeight.Bold) },
+            text = { Text(t.infoTipoUsuario, lineHeight = 22.sp) },
+            confirmButton = {
+                TextButton(onClick = { mostrarInfoTipo = false }) {
+                    Text(t.cerrarSesion.let { t.cancelar })
+                }
+            }
+        )
     }
 
     Column(
@@ -50,7 +66,6 @@ fun RegisterScreen(
     ) {
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Selector de idioma
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.End
@@ -89,7 +104,6 @@ fun RegisterScreen(
             value = dni,
             onValueChange = { dni = it.uppercase() },
             label = { Text(t.dni) },
-            placeholder = { Text("12345678A") },
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
@@ -137,33 +151,44 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        ExposedDropdownMenuBox(
-            expanded = expandedTipo,
-            onExpandedChange = { expandedTipo = !expandedTipo }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            OutlinedTextField(
-                value = tipo,
-                onValueChange = {},
-                readOnly = true,
-                label = { Text(t.tipo) },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedTipo) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .menuAnchor()
-            )
-            ExposedDropdownMenu(
+            ExposedDropdownMenuBox(
                 expanded = expandedTipo,
-                onDismissRequest = { expandedTipo = false }
+                onExpandedChange = { expandedTipo = !expandedTipo },
+                modifier = Modifier.weight(1f)
             ) {
-                tipos.forEach { opcion ->
-                    DropdownMenuItem(
-                        text = { Text(opcion) },
-                        onClick = {
-                            tipo = opcion
-                            expandedTipo = false
-                        }
-                    )
+                OutlinedTextField(
+                    value = tipo,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text(t.tipo) },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedTipo) },
+                    modifier = Modifier.fillMaxWidth().menuAnchor()
+                )
+                ExposedDropdownMenu(
+                    expanded = expandedTipo,
+                    onDismissRequest = { expandedTipo = false }
+                ) {
+                    tipos.forEach { opcion ->
+                        DropdownMenuItem(
+                            text = { Text(opcion) },
+                            onClick = {
+                                tipo = opcion
+                                expandedTipo = false
+                            }
+                        )
+                    }
                 }
+            }
+            IconButton(onClick = { mostrarInfoTipo = true }) {
+                Icon(
+                    Icons.Default.Info,
+                    contentDescription = "Info",
+                    tint = MaterialTheme.colorScheme.primary
+                )
             }
         }
 
@@ -181,9 +206,7 @@ fun RegisterScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
-            onClick = {
-                viewModel.registro(dni, nombre, apellidos, email, password, tipo)
-            },
+            onClick = { viewModel.registro(dni, nombre, apellidos, email, password, tipo) },
             modifier = Modifier.fillMaxWidth(),
             enabled = registroState !is RegistroState.Loading
         ) {

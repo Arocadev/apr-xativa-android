@@ -85,7 +85,33 @@ data class Textos(
 
     // General
     val errorConexion: String,
-    val volver: String
+    val volver: String,
+
+    // Espera
+    val estadoPendiente: String,
+    val estadoRechazado: String,
+    val motivoRechazo: String,
+    val adjuntarDocumento: String,
+    val documentoSubido: String,
+
+    // Interrogants
+    val infoTipoAcred: String,
+    val infoTipoDerecho: String,
+    val infoTipoUsuario: String,
+    val infoDerechoPuntual: String,
+
+    // Guía
+    val guia: String,
+    val guiaTitulo: String,
+    val guiaPaso1Titulo: String,
+    val guiaPaso1Desc: String,
+    val guiaPaso2Titulo: String,
+    val guiaPaso2Desc: String,
+    val guiaPaso3Titulo: String,
+    val guiaPaso3Desc: String,
+    val guiaPaso4Titulo: String,
+    val guiaPaso4Desc: String,
+    val necesitasAyuda: String,
 )
 
 val TextosVal = Textos(
@@ -142,7 +168,27 @@ val TextosVal = Textos(
     version = "Versió",
     contacto = "Contacte",
     errorConexion = "Error de connexió",
-    volver = "Tornar"
+    volver = "Tornar",
+    estadoPendiente = "Sol·licitud pendent",
+    estadoRechazado = "Sol·licitud rebutjada",
+    motivoRechazo = "Motiu del rebuig",
+    adjuntarDocumento = "Adjuntar documentació",
+    documentoSubido = "Document enviat correctament",
+    infoTipoAcred = "LLIURE: pots assignar qualsevol vehicle al teu dret d'accés.\nACREDITAT: el vehicle ha d'estar acreditat per l'Ajuntament.",
+    infoTipoDerecho = "PERMANENT: accés durant tot l'any, es renova automàticament.\nPUNTUAL: accés per a un dia concret, ideal per a visites.",
+    infoTipoUsuario = "Selecciona la teua tipologia segons la teua situació:\n\nA.1 — Resident empadronat al nucli antic\nA.2 — Resident no empadronat\nA.3 — Propietari sense residència\nB — Activitat econòmica al nucli antic\nC — Càrrega i descàrrega\nD — Serveis municipals\nE — Vehicles d'emergència\nF — Mobilitat reduïda\nG — Allotjaments turístics\nH.1 / H.2 — Altres casos especials\n\nEn cas de dubte, contacta amb l'Ajuntament.",
+    infoDerechoPuntual = "Pots crear fins a 5 accessos puntuals per mes. La data ha d'estar entre avui i l'últim dia del mes vinent.",
+    guia = "Guia d'ús",
+    guiaTitulo = "Com funciona l'APR?",
+    guiaPaso1Titulo = "1. Registra't",
+    guiaPaso1Desc = "Crea el teu compte amb el teu DNI i les teues dades personals.",
+    guiaPaso2Titulo = "2. Envia la documentació",
+    guiaPaso2Desc = "Adjunta els documents que acrediten la teua titularitat (empadronament, contracte, etc.).",
+    guiaPaso3Titulo = "3. Espera l'aprovació",
+    guiaPaso3Desc = "L'Ajuntament revisarà la teua sol·licitud i t'activarà l'accés.",
+    guiaPaso4Titulo = "4. Gestiona els teus vehicles",
+    guiaPaso4Desc = "Una vegada aprovat, registra els teus vehicles i crea drets d'accés permanents o puntuals.",
+    necesitasAyuda = "Necessites ajuda?",
 )
 
 val TextosEs = Textos(
@@ -199,7 +245,27 @@ val TextosEs = Textos(
     version = "Versión",
     contacto = "Contacto",
     errorConexion = "Error de conexión",
-    volver = "Volver"
+    volver = "Volver",
+    estadoPendiente = "Solicitud pendiente",
+    estadoRechazado = "Solicitud rechazada",
+    motivoRechazo = "Motivo del rechazo",
+    adjuntarDocumento = "Adjuntar documentación",
+    documentoSubido = "Documento enviado correctamente",
+    infoTipoAcred = "LIBRE: puedes asignar cualquier vehículo a tu derecho de acceso.\nACREDITADO: el vehículo debe estar acreditado por el Ayuntamiento.",
+    infoTipoDerecho = "PERMANENTE: acceso durante todo el año, se renueva automáticamente.\nPUNTUAL: acceso para un día concreto, ideal para visitas.",
+    infoTipoUsuario = "Selecciona tu tipología según tu situación:\n\nA.1 — Residente empadronado en el casco antiguo\nA.2 — Residente no empadronado\nA.3 — Propietario sin residencia\nB — Actividad económica en el casco antiguo\nC — Carga y descarga\nD — Servicios municipales\nE — Vehículos de emergencia\nF — Movilidad reducida\nG — Alojamientos turísticos\nH.1 / H.2 — Otros casos especiales\n\nEn caso de duda, contacta con el Ayuntamiento.",
+    infoDerechoPuntual = "Puedes crear hasta 5 accesos puntuales por mes. La fecha debe estar entre hoy y el último día del mes siguiente.",
+    guia = "Guía de uso",
+    guiaTitulo = "¿Cómo funciona el APR?",
+    guiaPaso1Titulo = "1. Regístrate",
+    guiaPaso1Desc = "Crea tu cuenta con tu DNI y tus datos personales.",
+    guiaPaso2Titulo = "2. Envía la documentación",
+    guiaPaso2Desc = "Adjunta los documentos que acrediten tu titularidad (empadronamiento, contrato, etc.).",
+    guiaPaso3Titulo = "3. Espera la aprobación",
+    guiaPaso3Desc = "El Ayuntamiento revisará tu solicitud y te activará el acceso.",
+    guiaPaso4Titulo = "4. Gestiona tus vehículos",
+    guiaPaso4Desc = "Una vez aprobado, registra tus vehículos y crea derechos de acceso permanentes o puntuales.",
+    necesitasAyuda = "¿Necesitas ayuda?",
 )
 
 val TextosEn = Textos(
@@ -256,5 +322,25 @@ val TextosEn = Textos(
     version = "Version",
     contacto = "Contact",
     errorConexion = "Connection error",
-    volver = "Back"
+    volver = "Back",
+    estadoPendiente = "Request pending",
+    estadoRechazado = "Request rejected",
+    motivoRechazo = "Rejection reason",
+    adjuntarDocumento = "Attach documentation",
+    documentoSubido = "Document sent successfully",
+    infoTipoAcred = "FREE: you can assign any vehicle to your access right.\nACCREDITED: the vehicle must be accredited by the Town Hall.",
+    infoTipoDerecho = "PERMANENT: access all year round, renewed automatically.\nTEMPORARY: access for a specific day, ideal for visits.",
+    infoTipoUsuario = "Select your type according to your situation:\n\nA.1 — Registered resident in the old town\nA.2 — Non-registered resident\nA.3 — Property owner without residence\nB — Economic activity in the old town\nC — Loading and unloading\nD — Municipal services\nE — Emergency vehicles\nF — Reduced mobility\nG — Tourist accommodation\nH.1 / H.2 — Other special cases\n\nIf in doubt, contact the Town Hall.",
+    infoDerechoPuntual = "You can create up to 5 temporary accesses per month. The date must be between today and the last day of next month.",
+    guia = "User guide",
+    guiaTitulo = "How does APR work?",
+    guiaPaso1Titulo = "1. Register",
+    guiaPaso1Desc = "Create your account with your ID and personal details.",
+    guiaPaso2Titulo = "2. Send documentation",
+    guiaPaso2Desc = "Attach the documents that prove your ownership (registration, contract, etc.).",
+    guiaPaso3Titulo = "3. Wait for approval",
+    guiaPaso3Desc = "The Town Hall will review your request and activate your access.",
+    guiaPaso4Titulo = "4. Manage your vehicles",
+    guiaPaso4Desc = "Once approved, register your vehicles and create permanent or temporary access rights.",
+    necesitasAyuda = "Need help?",
 )
