@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+
+    <!-- Hexágono dorado -->
+    <path
+        android:fillColor="#C9A84C"
+        android:pathData="M100,10 L180,55 L180,145 L100,190 L20,145 L20,55 Z"/>
+
+    <!-- Fondo rojo interior -->
+    <path
+        android:fillColor="#C0392B"
+        android:pathData="M100,22 L168,62 L168,138 L100,178 L32,138 L32,62 Z"/>
+
+    <!-- Letra A -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M75,130 L85,130 L88,115 L102,115 L105,130 L115,130 L100,70 Z M90,107 L100,78 L110,107 Z"/>
+
+    <!-- Letra P -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M55,70 L55,130 L65,130 L65,105 L78,105 Q88,105 88,87 Q88,70 78,70 Z M65,78 L76,78 Q80,78 80,87 Q80,97 76,97 L65,97 Z"/>
+
+    <!-- Letra R -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M112,70 L112,130 L122,130 L122,105 L132,105 L142,130 L153,130 L142,103 Q150,99 150,87 Q150,70 138,70 Z M122,78 L136,78 Q141,78 141,87 Q141,97 136,97 L122,97 Z"/>
+
+</vector>

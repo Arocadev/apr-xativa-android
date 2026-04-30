@@ -11,7 +11,7 @@ object RetrofitClient {
     //Movil fisico
     private const val BASE_URL = "http://192.168.1.197:8080/"
 
-    //Emulador
+    //Emulador android studio
     // private const val BASE_URL = "http://10.0.2.2:8080/"
 
     private val logging = HttpLoggingInterceptor().apply {

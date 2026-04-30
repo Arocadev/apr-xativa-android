@@ -13,11 +13,13 @@ import androidx.navigation.compose.rememberNavController
 import com.example.aprxtiva.ui.screens.*
 import com.example.aprxtiva.ui.theme.APRXativaTheme
 import com.example.aprxtiva.viewmodel.AuthViewModel
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        installSplashScreen()
         setContent {
             APRXativaTheme {
                 val navController = rememberNavController()
@@ -27,8 +29,17 @@ class MainActivity : ComponentActivity() {
 
                 NavHost(
                     navController = navController,
-                    startDestination = "login"
+                    startDestination = "splash"
                 ) {
+                    composable("splash") {
+                        SplashScreen(
+                            onSplashFinished = {
+                                navController.navigate("login") {
+                                    popUpTo("splash") { inclusive = true }
+                                }
+                            }
+                        )
+                    }
                     composable("login") {
                         LoginScreen(
                             onLoginSuccess = {
