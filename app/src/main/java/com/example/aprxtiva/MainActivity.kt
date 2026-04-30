@@ -73,6 +73,7 @@ class MainActivity : ComponentActivity() {
                             onNavigateToDerechos = { navController.navigate("derechos") },
                             onNavigateToPerfil = { navController.navigate("perfil") },
                             onNavigateToAjustes = { navController.navigate("opciones") },
+                            onNavigateToGuia = { navController.navigate("guia") },
                             onLogout = {
                                 navController.navigate("login") {
                                     popUpTo("home") { inclusive = true }

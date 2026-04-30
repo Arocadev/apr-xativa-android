@@ -1,20 +1,27 @@
 package com.example.aprxtiva.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.aprxtiva.entities.Vehiculo
+import com.example.aprxtiva.ui.theme.TemaManager
 import com.example.aprxtiva.utils.IdiomaManager
 import com.example.aprxtiva.viewmodel.EstadoUI
 import com.example.aprxtiva.viewmodel.VehiculoViewModel
@@ -34,6 +41,22 @@ fun VehiculosScreen(
     var expandedTipo by remember { mutableStateOf(false) }
     var confirmandoId by remember { mutableStateOf<Long?>(null) }
     var mostrarInfoTipoAcred by remember { mutableStateOf(false) }
+
+    val oscuro = TemaManager.oscuro
+    val colorFondo = if (oscuro) Color(0xFF1C1C1C) else Color(0xFFF8F7F5)
+    val colorTexto = if (oscuro) Color.White else Color(0xFF2C2C2C)
+    val colorSubtexto = if (oscuro) Color(0xFFAAAAAA) else Color.Gray
+    val colorCard = if (oscuro) Color(0xFF2C2C2C) else Color.White
+
+    val fieldColors = OutlinedTextFieldDefaults.colors(
+        focusedBorderColor = Color(0xFFC0392B),
+        unfocusedBorderColor = colorSubtexto,
+        focusedLabelColor = Color(0xFFC0392B),
+        unfocusedLabelColor = colorSubtexto,
+        cursorColor = Color(0xFFC0392B),
+        focusedTextColor = colorTexto,
+        unfocusedTextColor = colorTexto
+    )
 
     LaunchedEffect(Unit) { viewModel.cargarVehiculos() }
 
@@ -58,36 +81,51 @@ fun VehiculosScreen(
                     IconButton(onClick = onVolver) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = t.volver)
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFFC0392B),
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White
+                )
             )
         }
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(colorFondo)
                 .padding(padding)
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState())
+                .padding(20.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Button(
-                onClick = { mostrarFormulario = !mostrarFormulario },
-                modifier = Modifier.fillMaxWidth()
+            // Formulario añadir
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = colorCard),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
-                Text(if (mostrarFormulario) t.cancelar else t.addVehiculo)
-            }
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Text(
+                        text = t.addVehiculo,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        color = Color(0xFFC0392B),
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
 
-            if (mostrarFormulario) {
-                Spacer(modifier = Modifier.height(12.dp))
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.padding(16.dp)) {
+                    if (mostrarFormulario) {
                         OutlinedTextField(
                             value = matricula,
                             onValueChange = { matricula = it.uppercase() },
                             label = { Text(t.matricula) },
                             singleLine = true,
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = fieldColors
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically
@@ -103,7 +141,9 @@ fun VehiculosScreen(
                                     readOnly = true,
                                     label = { Text(t.tipoAcred) },
                                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedTipo) },
-                                    modifier = Modifier.fillMaxWidth().menuAnchor()
+                                    modifier = Modifier.fillMaxWidth().menuAnchor(),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = fieldColors
                                 )
                                 ExposedDropdownMenu(
                                     expanded = expandedTipo,
@@ -121,14 +161,10 @@ fun VehiculosScreen(
                                 }
                             }
                             IconButton(onClick = { mostrarInfoTipoAcred = true }) {
-                                Icon(
-                                    Icons.Default.Info,
-                                    contentDescription = "Info",
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
+                                Icon(Icons.Default.Info, contentDescription = "Info", tint = Color(0xFFC0392B))
                             }
                         }
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
                         Button(
                             onClick = {
                                 if (matricula.isNotBlank()) {
@@ -137,29 +173,65 @@ fun VehiculosScreen(
                                     mostrarFormulario = false
                                 }
                             },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth().height(50.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC0392B))
                         ) {
-                            Text(t.addVehiculo)
+                            Text(t.confirmar, fontWeight = FontWeight.SemiBold, color = Color.White)
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        OutlinedButton(
+                            onClick = {
+                                mostrarFormulario = false
+                                matricula = ""
+                            },
+                            modifier = Modifier.fillMaxWidth().height(50.dp),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text(t.cancelar, color = Color(0xFFC0392B))
+                        }
+                    } else {
+                        Button(
+                            onClick = { mostrarFormulario = true },
+                            modifier = Modifier.fillMaxWidth().height(50.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC0392B))
+                        ) {
+                            Text(t.addVehiculo, fontWeight = FontWeight.SemiBold, color = Color.White)
                         }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
+            // Lista vehículos
             when {
                 estado is EstadoUI.Loading -> {
                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
+                        CircularProgressIndicator(color = Color(0xFFC0392B))
                     }
                 }
                 vehiculos.isEmpty() -> {
-                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        Text(t.sinVehiculos, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = colorCard)
+                    ) {
+                        Column(
+                            modifier = Modifier.fillMaxWidth().padding(32.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(text = "🚗", fontSize = 40.sp)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = t.sinVehiculos,
+                                color = colorSubtexto,
+                                fontSize = 15.sp
+                            )
+                        }
                     }
                 }
                 else -> {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         vehiculos.forEach { vehiculo ->
                             VehiculoCard(
                                 vehiculo = vehiculo,
@@ -170,7 +242,10 @@ fun VehiculosScreen(
                                     viewModel.deleteVehiculo(it)
                                     confirmandoId = null
                                 },
-                                t = t
+                                t = t,
+                                colorCard = colorCard,
+                                colorTexto = colorTexto,
+                                colorSubtexto = colorSubtexto
                             )
                         }
                     }
@@ -187,40 +262,73 @@ fun VehiculoCard(
     onConfirmarEliminar: (Long) -> Unit,
     onCancelar: () -> Unit,
     onEliminar: (Long) -> Unit,
-    t: com.example.aprxtiva.utils.Textos
+    t: com.example.aprxtiva.utils.Textos,
+    colorCard: Color = Color.White,
+    colorTexto: Color = Color(0xFF2C2C2C),
+    colorSubtexto: Color = Color.Gray
 ) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = colorCard),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFFFFF0EE)),
+                contentAlignment = Alignment.Center
             ) {
-                Column {
-                    Text(text = vehiculo.matricula, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                    Text(text = vehiculo.tipoAcred, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Icon(
+                    Icons.Default.DirectionsCar,
+                    contentDescription = null,
+                    tint = Color(0xFFC0392B),
+                    modifier = Modifier.size(26.dp)
+                )
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                Text(text = vehiculo.matricula, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = colorTexto)
+                Text(text = vehiculo.tipoAcred, fontSize = 13.sp, color = colorSubtexto)
+                if (confirmandoId == vehiculo.id) {
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Button(
+                            onClick = { onEliminar(vehiculo.id) },
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                            shape = RoundedCornerShape(10.dp),
+                            modifier = Modifier.weight(1f)
+                        ) { Text(t.confirmar, fontSize = 13.sp) }
+                        OutlinedButton(
+                            onClick = onCancelar,
+                            shape = RoundedCornerShape(10.dp),
+                            modifier = Modifier.weight(1f)
+                        ) { Text(t.cancelar, fontSize = 13.sp) }
+                    }
                 }
+            }
+            Column(horizontalAlignment = Alignment.End) {
                 Text(
                     text = if (vehiculo.activo) t.activo else t.inactivo,
                     fontSize = 12.sp,
-                    color = if (vehiculo.activo) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                    fontWeight = FontWeight.Medium,
+                    color = if (vehiculo.activo) Color(0xFF27AE60) else Color(0xFFC0392B)
                 )
-            }
-            if (confirmandoId == vehiculo.id) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(
-                        onClick = { onEliminar(vehiculo.id) },
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-                    ) { Text(t.confirmar) }
-                    OutlinedButton(onClick = onCancelar) { Text(t.cancelar) }
+                if (confirmandoId != vehiculo.id) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedButton(
+                        onClick = { onConfirmarEliminar(vehiculo.id) },
+                        shape = RoundedCornerShape(10.dp),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                    ) {
+                        Text(t.eliminar, fontSize = 12.sp, color = Color(0xFFC0392B))
+                    }
                 }
-            } else {
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedButton(
-                    onClick = { onConfirmarEliminar(vehiculo.id) },
-                    modifier = Modifier.fillMaxWidth()
-                ) { Text(t.eliminar) }
             }
         }
     }

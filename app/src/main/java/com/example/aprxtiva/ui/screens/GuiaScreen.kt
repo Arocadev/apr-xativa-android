@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -16,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.aprxtiva.ui.theme.TemaManager
 import com.example.aprxtiva.utils.IdiomaManager
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -23,11 +25,20 @@ import com.example.aprxtiva.utils.IdiomaManager
 fun GuiaScreen(onVolver: () -> Unit) {
     val t = IdiomaManager.textos
 
+    val oscuro = TemaManager.oscuro
+    val colorFondo = if (oscuro) Color(0xFF1C1C1C) else Color(0xFFF8F7F5)
+    val colorTexto = if (oscuro) Color.White else Color(0xFF2C2C2C)
+    val colorSubtexto = if (oscuro) Color(0xFFAAAAAA) else Color.DarkGray
+    val colorCard = if (oscuro) Color(0xFF2C2C2C) else Color.White
+    val colorContactCard = if (oscuro) Color(0xFF2C2420) else Color(0xFFFFF3E0)
+
     val pasos = listOf(
         Triple("📝", t.guiaPaso1Titulo, t.guiaPaso1Desc),
         Triple("📄", t.guiaPaso2Titulo, t.guiaPaso2Desc),
         Triple("⏳", t.guiaPaso3Titulo, t.guiaPaso3Desc),
-        Triple("🚗", t.guiaPaso4Titulo, t.guiaPaso4Desc),
+        Triple("✅", t.guiaPaso4Titulo, t.guiaPaso4Desc),
+        Triple("🚗", t.guiaPaso5Titulo, t.guiaPaso5Desc),
+        Triple("🔑", t.guiaPaso6Titulo, t.guiaPaso6Desc),
     )
 
     Scaffold(
@@ -50,66 +61,65 @@ fun GuiaScreen(onVolver: () -> Unit) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(colorFondo)
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
                 .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
                 text = t.guiaTitulo,
-                fontSize = 26.sp,
+                fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFFC0392B),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
-
             pasos.forEach { (emoji, titulo, desc) ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFAFAFA)),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = colorCard),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     Row(
-                        modifier = Modifier.padding(20.dp),
+                        modifier = Modifier.padding(16.dp),
                         verticalAlignment = Alignment.Top,
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        horizontalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(56.dp)
+                                .size(52.dp)
                                 .background(Color(0xFFC0392B), CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(text = emoji, fontSize = 26.sp)
+                            Text(text = emoji, fontSize = 24.sp)
                         }
-
                         Column {
                             Text(
                                 text = titulo,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 18.sp,
+                                fontSize = 16.sp,
                                 color = Color(0xFFC0392B)
                             )
-                            Spacer(modifier = Modifier.height(6.dp))
+                            Spacer(modifier = Modifier.height(4.dp))
                             Text(
                                 text = desc,
-                                fontSize = 16.sp,
-                                color = Color.DarkGray,
-                                lineHeight = 24.sp
+                                fontSize = 14.sp,
+                                color = colorSubtexto,
+                                lineHeight = 22.sp
                             )
                         }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
+            // Card contacto
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF3E0)),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = colorContactCard),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(
@@ -128,21 +138,23 @@ fun GuiaScreen(onVolver: () -> Unit) {
                     Text(
                         text = t.necesitasAyuda,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
+                        fontSize = 17.sp,
                         textAlign = TextAlign.Center,
+                        color = colorTexto,
                         modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "Ajuntament de Xàtiva",
-                        fontSize = 15.sp,
-                        color = Color.DarkGray,
+                        fontSize = 14.sp,
+                        color = colorSubtexto,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
                     )
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "📞 962 279 000",
-                        fontSize = 16.sp,
+                        fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFFC0392B),
                         textAlign = TextAlign.Center,
@@ -150,8 +162,8 @@ fun GuiaScreen(onVolver: () -> Unit) {
                     )
                     Text(
                         text = "✉️ info@xativa.es",
-                        fontSize = 15.sp,
-                        color = Color.DarkGray,
+                        fontSize = 14.sp,
+                        color = colorSubtexto,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
                     )

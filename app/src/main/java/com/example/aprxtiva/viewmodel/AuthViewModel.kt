@@ -1,12 +1,15 @@
 package com.example.aprxtiva.viewmodel
 
 import android.app.Application
+import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.aprxtiva.api.RetrofitClient
 import com.example.aprxtiva.repository.AuthRepository
 import com.example.aprxtiva.utils.TokenManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class AuthViewModel(application: Application) : AndroidViewModel(application) {
@@ -25,14 +28,45 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     val rol = tokenManager.rol
     val activo = tokenManager.activo
 
+    private val _perfilDni = MutableStateFlow("")
+    val perfilDni: StateFlow<String> = _perfilDni
+
+    private val _perfilNombre = MutableStateFlow("")
+    val perfilNombre: StateFlow<String> = _perfilNombre
+
+    private val _perfilApellidos = MutableStateFlow("")
+    val perfilApellidos: StateFlow<String> = _perfilApellidos
+
+    private val _perfilTipo = MutableStateFlow("")
+    val perfilTipo: StateFlow<String> = _perfilTipo
+
+    fun cargarPerfil(context: Context) {
+        viewModelScope.launch {
+            try {
+                val token = tokenManager.token.first() ?: return@launch
+                val api = RetrofitClient.getClient(token)
+                val response = api.getMe()
+                if (response.isSuccessful) {
+                    val usuario = response.body()!!
+                    _perfilDni.value = usuario.dni
+                    _perfilNombre.value = usuario.nombre
+                    _perfilApellidos.value = usuario.apellidos
+                    _perfilTipo.value = usuario.tipo
+                }
+            } catch (e: Exception) {
+                // silencioso
+            }
+        }
+    }
+
     fun login(dni: String, password: String) {
         viewModelScope.launch {
             _loginState.value = LoginState.Loading
             val result = repository.login(dni, password)
             if (result.isSuccess) {
                 val response = result.getOrNull()!!
-                tokenManager.guardarSesion(response.token, response.email, response.rol, response.activo ?: true)
-                _loginState.value = LoginState.Success(response.activo ?: true)
+                tokenManager.guardarSesion(response.token, response.email, response.rol, response.activo)
+                _loginState.value = LoginState.Success(response.activo)
             } else {
                 _loginState.value = LoginState.Error(result.exceptionOrNull()?.message ?: "Error")
             }

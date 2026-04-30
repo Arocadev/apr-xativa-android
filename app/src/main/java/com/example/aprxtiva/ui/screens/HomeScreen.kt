@@ -3,29 +3,34 @@ package com.example.aprxtiva.ui.screens
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.aprxtiva.repository.DocumentoRepository
+import com.example.aprxtiva.ui.theme.TemaManager
 import com.example.aprxtiva.utils.IdiomaManager
 import com.example.aprxtiva.utils.TokenManager
 import com.example.aprxtiva.viewmodel.AuthViewModel
@@ -42,6 +47,7 @@ fun HomeScreen(
     onNavigateToDerechos: () -> Unit,
     onNavigateToPerfil: () -> Unit,
     onNavigateToAjustes: () -> Unit,
+    onNavigateToGuia: () -> Unit,
     onLogout: () -> Unit,
     esLandscape: Boolean = false,
     viewModel: AuthViewModel = viewModel()
@@ -51,6 +57,13 @@ fun HomeScreen(
     val activo by viewModel.activo.collectAsState(initial = true)
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+
+    val oscuro = TemaManager.oscuro
+    val colorFondo = if (oscuro) Color(0xFF1C1C1C) else Color(0xFFF8F7F5)
+    val colorTexto = if (oscuro) Color.White else Color(0xFF2C2C2C)
+    val colorSubtexto = if (oscuro) Color(0xFFAAAAAA) else Color.Gray
+    val colorCard = if (oscuro) Color(0xFF2C2C2C) else Color.White
+    val colorIconBg = if (oscuro) Color(0xFF3C2020) else Color(0xFFFFF0EE)
 
     var uriSeleccionada by remember { mutableStateOf<Uri?>(null) }
     var nombreArchivo by remember { mutableStateOf("") }
@@ -68,37 +81,81 @@ fun HomeScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("APR Xàtiva", fontWeight = FontWeight.Bold) },
-                actions = {
-                    IconButton(onClick = onNavigateToAjustes) {
-                        Icon(Icons.Default.Settings, contentDescription = t.ajustes)
-                    }
-                    IconButton(onClick = {
-                        scope.launch {
-                            viewModel.logout()
-                            onLogout()
-                        }
-                    }) {
-                        Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = t.cerrarSesion)
-                    }
-                }
-            )
-        }
-    ) { padding ->
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colorFondo)
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-                .padding(24.dp)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .verticalScroll(rememberScrollState())
         ) {
+            // Header rojo
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xFFC0392B))
+                    .padding(horizontal = 24.dp, vertical = 12.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "APR Xàtiva",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                    Row {
+                        IconButton(onClick = onNavigateToAjustes) {
+                            Icon(Icons.Default.Settings, contentDescription = t.ajustes, tint = Color.White)
+                        }
+                        IconButton(onClick = {
+                            scope.launch {
+                                viewModel.logout()
+                                onLogout()
+                            }
+                        }) {
+                            Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = t.cerrarSesion, tint = Color.White)
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Text(
+                text = t.bienvenido,
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                color = colorTexto,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
+                textAlign = TextAlign.Center
+            )
+            Text(
+                text = email ?: "",
+                fontSize = 15.sp,
+                color = colorSubtexto,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 2.dp),
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Banner inactivo
             if (!activo) {
                 Card(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp),
+                    shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF3CD))
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
@@ -178,53 +235,56 @@ fun HomeScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "${t.bienvenido}!",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-            email?.let {
-                Text(
-                    text = it,
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 4.dp, bottom = 24.dp)
+            // Tarjetas
+            Column(
+                modifier = Modifier.padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                HomeCard(
+                    titulo = t.misVehiculos,
+                    subtitulo = t.subtituloVehiculos,
+                    icono = Icons.Default.DirectionsCar,
+                    onClick = onNavigateToVehiculos,
+                    bloqueado = !activo,
+                    colorCard = colorCard,
+                    colorTexto = colorTexto,
+                    colorIconBg = colorIconBg
+                )
+                HomeCard(
+                    titulo = t.misDerechos,
+                    subtitulo = t.subtituloDerechos,
+                    icono = Icons.Default.Lock,
+                    onClick = onNavigateToDerechos,
+                    bloqueado = !activo,
+                    colorCard = colorCard,
+                    colorTexto = colorTexto,
+                    colorIconBg = colorIconBg
+                )
+                HomeCard(
+                    titulo = t.guia,
+                    subtitulo = t.subtituloGuia,
+                    icono = Icons.Default.MenuBook,
+                    onClick = onNavigateToGuia,
+                    bloqueado = false,
+                    colorCard = colorCard,
+                    colorTexto = colorTexto,
+                    colorIconBg = colorIconBg
                 )
             }
 
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.height(400.dp)
-            ) {
-                item {
-                    HomeCard(
-                        titulo = t.misVehiculos,
-                        icono = Icons.Default.DirectionsCar,
-                        onClick = onNavigateToVehiculos,
-                        bloqueado = !activo
-                    )
-                }
-                item {
-                    HomeCard(
-                        titulo = t.misDerechos,
-                        icono = Icons.Default.Lock,
-                        onClick = onNavigateToDerechos,
-                        bloqueado = !activo
-                    )
-                }
-                item {
-                    HomeCard(
-                        titulo = t.miPerfil,
-                        icono = Icons.Default.Person,
-                        onClick = onNavigateToPerfil,
-                        bloqueado = false
-                    )
-                }
-            }
+            Spacer(modifier = Modifier.height(88.dp))
+        }
+
+        // FAB perfil
+        FloatingActionButton(
+            onClick = onNavigateToPerfil,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(24.dp),
+            containerColor = Color(0xFFC0392B),
+            contentColor = Color.White
+        ) {
+            Icon(Icons.Default.Person, contentDescription = t.miPerfil)
         }
     }
 }
@@ -232,42 +292,56 @@ fun HomeScreen(
 @Composable
 fun HomeCard(
     titulo: String,
+    subtitulo: String,
     icono: ImageVector,
     onClick: () -> Unit,
-    bloqueado: Boolean = false
+    bloqueado: Boolean = false,
+    colorCard: Color = Color.White,
+    colorTexto: Color = Color(0xFF2C2C2C),
+    colorIconBg: Color = Color(0xFFFFF0EE)
 ) {
     Card(
         onClick = { if (!bloqueado) onClick() },
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(120.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = if (bloqueado) 0.dp else 4.dp),
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = if (bloqueado) 0.dp else 3.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (bloqueado) Color(0xFFE0E0E0) else MaterialTheme.colorScheme.surface
+            containerColor = if (bloqueado) Color(0xFFE0E0E0) else colorCard
         )
     ) {
-        Column(
+        Row(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxWidth()
+                .padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Icon(
-                imageVector = icono,
-                contentDescription = titulo,
-                modifier = Modifier.size(36.dp),
-                tint = if (bloqueado) Color.Gray else MaterialTheme.colorScheme.primary
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = titulo,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Medium,
-                color = if (bloqueado) Color.Gray else MaterialTheme.colorScheme.onSurface
-            )
-            if (bloqueado) {
-                Text(text = "🔒", fontSize = 12.sp)
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(CircleShape)
+                    .background(if (bloqueado) Color(0xFFBDBDBD) else colorIconBg),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icono,
+                    contentDescription = titulo,
+                    modifier = Modifier.size(28.dp),
+                    tint = if (bloqueado) Color.Gray else Color(0xFFC0392B)
+                )
+            }
+            Column {
+                Text(
+                    text = if (bloqueado) "$titulo 🔒" else titulo,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = if (bloqueado) Color.Gray else colorTexto
+                )
+                Text(
+                    text = subtitulo,
+                    fontSize = 13.sp,
+                    color = if (bloqueado) Color.Gray else Color(0xFF888888)
+                )
             }
         }
     }

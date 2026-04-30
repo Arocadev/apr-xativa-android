@@ -1,15 +1,22 @@
 package com.example.aprxtiva.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -17,7 +24,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.aprxtiva.ui.theme.TemaManager
 import com.example.aprxtiva.utils.IdiomaManager
 import com.example.aprxtiva.viewmodel.AuthViewModel
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,7 +34,14 @@ fun OpcionesScreen(
     viewModel: AuthViewModel = viewModel()
 ) {
     val t = IdiomaManager.textos
-    val scope = rememberCoroutineScope()
+
+    val oscuro = TemaManager.oscuro
+    val colorFondo = if (oscuro) Color(0xFF1C1C1C) else Color(0xFFF8F7F5)
+    val colorTexto = if (oscuro) Color.White else Color(0xFF2C2C2C)
+    val colorSubtexto = if (oscuro) Color(0xFFAAAAAA) else Color.Gray
+    val colorCard = if (oscuro) Color(0xFF2C2C2C) else Color.White
+
+    var notificaciones by remember { mutableStateOf(true) }
 
     Scaffold(
         topBar = {
@@ -38,26 +51,39 @@ fun OpcionesScreen(
                     IconButton(onClick = onVolver) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = t.volver)
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFFC0392B),
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White
+                )
             )
         }
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(colorFondo)
                 .padding(padding)
-                .padding(16.dp)
+                .padding(20.dp)
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = t.idioma,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        modifier = Modifier.padding(bottom = 12.dp)
-                    )
+
+            // Idioma
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = colorCard),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.Language, contentDescription = null, tint = Color(0xFFC0392B), modifier = Modifier.size(22.dp))
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(text = t.idioma, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = colorTexto)
+                    }
+                    Spacer(modifier = Modifier.height(14.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -66,69 +92,117 @@ fun OpcionesScreen(
                             FilterChip(
                                 selected = IdiomaManager.idiomaActual == codigo,
                                 onClick = { IdiomaManager.idiomaActual = codigo },
-                                label = { Text(nombre, fontSize = 13.sp) },
-                                modifier = Modifier.weight(1f)
+                                label = { Text(nombre, fontSize = 12.sp) },
+                                modifier = Modifier.weight(1f),
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = Color(0xFFC0392B),
+                                    selectedLabelColor = Color.White
+                                )
                             )
                         }
                     }
                 }
             }
 
-            Card(modifier = Modifier.fillMaxWidth()) {
+            // Mode fosc
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = colorCard),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
+                        .padding(20.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = t.modoOscuro,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.DarkMode, contentDescription = null, tint = Color(0xFFC0392B), modifier = Modifier.size(22.dp))
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(text = t.modoOscuro, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = colorTexto)
+                    }
                     Switch(
                         checked = TemaManager.oscuro,
-                        onCheckedChange = { TemaManager.oscuro = it }
+                        onCheckedChange = { TemaManager.oscuro = it },
+                        colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = Color(0xFFC0392B))
                     )
                 }
             }
 
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = t.acercaDe,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        modifier = Modifier.padding(bottom = 12.dp)
-                    )
-                    Text(text = "${t.version}: 1.0.0", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(text = "${t.contacto}: info@xativa.es", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(text = "Ajuntament de Xàtiva · 962 279 000", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-            }
-
-            Button(
-                onClick = onGuia,
+            // Notificacions
+            Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC0392B))
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = colorCard),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
-                Text("📖  ${t.guia}", fontSize = 16.sp)
-            }
-
-            Button(
-                onClick = {
-                    scope.launch {
-                        viewModel.logout()
-                        onLogout()
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.Notifications, contentDescription = null, tint = Color(0xFFC0392B), modifier = Modifier.size(22.dp))
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Column {
+                            Text(text = "Notificacions", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = colorTexto)
+                            Text(text = "Avisos de sol·licituds i drets", fontSize = 12.sp, color = colorSubtexto)
+                        }
                     }
-                },
+                    Switch(
+                        checked = notificaciones,
+                        onCheckedChange = { notificaciones = it },
+                        colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = Color(0xFFC0392B))
+                    )
+                }
+            }
+
+            // Sobre l'aplicació
+            Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = colorCard),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
-                Text(t.cerrarSesion)
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.Info, contentDescription = null, tint = Color(0xFFC0392B), modifier = Modifier.size(22.dp))
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(text = t.acercaDe, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = colorTexto)
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(text = t.version, fontSize = 14.sp, color = colorSubtexto)
+                        Text(text = "1.0.0", fontSize = 14.sp, color = colorTexto, fontWeight = FontWeight.Medium)
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                    HorizontalDivider(color = colorSubtexto.copy(alpha = 0.2f))
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(text = t.contacto, fontSize = 14.sp, color = colorSubtexto)
+                        Text(text = "info@xativa.es", fontSize = 14.sp, color = colorTexto, fontWeight = FontWeight.Medium)
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                    HorizontalDivider(color = colorSubtexto.copy(alpha = 0.2f))
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(text = "Telèfon", fontSize = 14.sp, color = colorSubtexto)
+                        Text(text = "962 279 000", fontSize = 14.sp, color = colorTexto, fontWeight = FontWeight.Medium)
+                    }
+                }
             }
         }
     }
