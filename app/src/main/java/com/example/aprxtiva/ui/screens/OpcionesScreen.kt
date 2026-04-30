@@ -149,8 +149,8 @@ fun OpcionesScreen(
                         Icon(Icons.Default.Notifications, contentDescription = null, tint = Color(0xFFC0392B), modifier = Modifier.size(22.dp))
                         Spacer(modifier = Modifier.width(10.dp))
                         Column {
-                            Text(text = "Notificacions", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = colorTexto)
-                            Text(text = "Avisos de sol·licituds i drets", fontSize = 12.sp, color = colorSubtexto)
+                            Text(text = t.notificacions, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = colorTexto)
+                            Text(text = t.avisosNotificacions, fontSize = 12.sp, color = colorSubtexto)
                         }
                     }
                     Switch(
@@ -199,7 +199,7 @@ fun OpcionesScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(text = "Telèfon", fontSize = 14.sp, color = colorSubtexto)
+                        Text(text = t.telefon, fontSize = 14.sp, color = colorSubtexto)
                         Text(text = "962 279 000", fontSize = 14.sp, color = colorTexto, fontWeight = FontWeight.Medium)
                     }
                 }
