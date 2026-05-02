@@ -29,11 +29,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.aprxtiva.api.RetrofitClient
 import com.example.aprxtiva.repository.DocumentoRepository
 import com.example.aprxtiva.ui.theme.TemaManager
 import com.example.aprxtiva.utils.IdiomaManager
 import com.example.aprxtiva.utils.TokenManager
 import com.example.aprxtiva.viewmodel.AuthViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -54,7 +56,7 @@ fun HomeScreen(
 ) {
     val t = IdiomaManager.textos
     val email by viewModel.email.collectAsState(initial = "")
-    val activo by viewModel.activo.collectAsState(initial = true)
+    val activo by viewModel.activo.collectAsState(initial = false)
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
@@ -70,14 +72,82 @@ fun HomeScreen(
     var documentoSubido by remember { mutableStateOf(false) }
     var subiendo by remember { mutableStateOf(false) }
     var errorEnvio by remember { mutableStateOf("") }
+    var estadoSolicitud by remember { mutableStateOf<String?>(null) }
+    var saliendo by remember { mutableStateOf(false) }
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let {
             uriSeleccionada = it
-            nombreArchivo = uri.lastPathSegment?.replace(":", "_") ?: "documento"
+            val cursor = context.contentResolver.query(it, null, null, null, null)
+            nombreArchivo = cursor?.use { c ->
+                val nameIndex = c.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+                c.moveToFirst()
+                c.getString(nameIndex)
+            } ?: uri.lastPathSegment?.replace(":", "_") ?: "documento"
             errorEnvio = ""
+        }
+    }
+
+    LaunchedEffect(activo) {
+        if (!activo) {
+            while (!saliendo) {
+                try {
+                    val token = TokenManager(context).token.first()
+                    if (token == null) break
+                    val api = RetrofitClient.getClient(token)
+                    val response = api.getEstadoSolicitud()
+                    if (response.isSuccessful) {
+                        val solicitud = response.body()
+                        estadoSolicitud = solicitud?.estado ?: "DESACTIVADO"
+                        if (solicitud?.estado == "APROBADA") {
+                            TokenManager(context).guardarActivo(true)
+                            break
+                        }
+                    } else {
+                        estadoSolicitud = "DESACTIVADO"
+                    }
+                } catch (e: Exception) {
+                    estadoSolicitud = "DESACTIVADO"
+                }
+                var elapsed = 0
+                while (elapsed < 10_000 && !saliendo) {
+                    delay(100)
+                    elapsed += 100
+                }
+                if (saliendo) break
+            }
+        }
+    }
+
+    fun subirDocumento(uri: Uri, crearNuevaSolicitud: Boolean) {
+        scope.launch {
+            subiendo = true
+            errorEnvio = ""
+            try {
+                val token = TokenManager(context).token.first() ?: return@launch
+                val inputStream = context.contentResolver.openInputStream(uri)
+                val bytes = inputStream?.readBytes() ?: return@launch
+                val mimeType = context.contentResolver.getType(uri) ?: "application/octet-stream"
+                val requestBody = bytes.toRequestBody(mimeType.toMediaTypeOrNull())
+                val part = MultipartBody.Part.createFormData("archivo", nombreArchivo, requestBody)
+                val result = DocumentoRepository(token).subirDocumento(part)
+                if (result.isSuccess) {
+                    if (crearNuevaSolicitud) {
+                        val api = RetrofitClient.getClient(token)
+                        api.crearSolicitud()
+                    }
+                    documentoSubido = true
+                    estadoSolicitud = "PENDIENTE"
+                } else {
+                    errorEnvio = t.errorConexion
+                }
+            } catch (e: Exception) {
+                errorEnvio = t.errorConexion
+            } finally {
+                subiendo = false
+            }
         }
     }
 
@@ -91,7 +161,6 @@ fun HomeScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            // Header rojo
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -114,10 +183,9 @@ fun HomeScreen(
                             Icon(Icons.Default.Settings, contentDescription = t.ajustes, tint = Color.White)
                         }
                         IconButton(onClick = {
-                            scope.launch {
-                                viewModel.logout()
-                                onLogout()
-                            }
+                            saliendo = true
+                            onLogout()
+                            scope.launch { viewModel.logout() }
                         }) {
                             Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = t.cerrarSesion, tint = Color.White)
                         }
@@ -149,85 +217,113 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Banner inactivo
-            if (!activo) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF3CD))
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = "⚠️ Compte pendent d'aprovació",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp,
-                            color = Color(0xFF856404)
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "Has d'enviar la documentació per desbloquejar l'accés.",
-                            fontSize = 13.sp,
-                            color = Color(0xFF856404)
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
-                        if (documentoSubido) {
-                            Text(
-                                text = "✅ Document enviat. L'administrador el revisarà prompte.",
-                                fontSize = 13.sp,
-                                color = Color(0xFF856404)
-                            )
-                        } else {
-                            OutlinedButton(
-                                onClick = { launcher.launch("*/*") },
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
+            if (!activo && !saliendo) {
+                when (estadoSolicitud) {
+                    null -> {
+                        Box(
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(color = Color(0xFFC0392B))
+                        }
+                    }
+                    "DESACTIVADO" -> {
+                        Card(
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color(0xFFFFEBEE))
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
                                 Text(
-                                    text = if (nombreArchivo.isEmpty()) "Seleccionar document" else "📄 $nombreArchivo",
-                                    fontSize = 13.sp
+                                    text = t.compteDesactivat,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 14.sp,
+                                    color = Color(0xFFC0392B)
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = t.compteDesactivatDesc,
+                                    fontSize = 13.sp,
+                                    color = Color(0xFFC0392B)
                                 )
                             }
-                            if (nombreArchivo.isNotEmpty()) {
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Button(
-                                    onClick = {
+                        }
+                    }
+                    "RECHAZADA" -> {
+                        Card(
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF3CD))
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Text(
+                                    text = t.solicitudRebutjada,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 14.sp,
+                                    color = Color(0xFF856404)
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = t.solicitudRebutjadaDesc,
+                                    fontSize = 13.sp,
+                                    color = Color(0xFF856404)
+                                )
+                                Spacer(modifier = Modifier.height(12.dp))
+                                BannerSubirDocumento(
+                                    nombreArchivo = nombreArchivo,
+                                    documentoSubido = documentoSubido,
+                                    subiendo = subiendo,
+                                    errorEnvio = errorEnvio,
+                                    textoSeleccionar = t.seleccionarDocument,
+                                    textoEnviar = t.enviarDocument,
+                                    textoEnviado = t.documentEnviat,
+                                    onSeleccionar = { launcher.launch("*/*") },
+                                    onEnviar = {
                                         uriSeleccionada?.let { uri ->
-                                            scope.launch {
-                                                subiendo = true
-                                                errorEnvio = ""
-                                                try {
-                                                    val token = TokenManager(context).token.first() ?: return@launch
-                                                    val inputStream = context.contentResolver.openInputStream(uri)
-                                                    val bytes = inputStream?.readBytes() ?: return@launch
-                                                    val mimeType = context.contentResolver.getType(uri) ?: "application/octet-stream"
-                                                    val requestBody = bytes.toRequestBody(mimeType.toMediaTypeOrNull())
-                                                    val part = MultipartBody.Part.createFormData("archivo", nombreArchivo, requestBody)
-                                                    val result = DocumentoRepository(token).subirDocumento(part)
-                                                    if (result.isSuccess) documentoSubido = true
-                                                    else errorEnvio = "Error en enviar el document"
-                                                } catch (e: Exception) {
-                                                    errorEnvio = t.errorConexion
-                                                } finally {
-                                                    subiendo = false
-                                                }
-                                            }
+                                            subirDocumento(uri, crearNuevaSolicitud = true)
                                         }
                                     },
-                                    enabled = !subiendo,
-                                    modifier = Modifier.fillMaxWidth(),
-                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF856404))
-                                ) {
-                                    if (subiendo) {
-                                        CircularProgressIndicator(modifier = Modifier.size(16.dp), color = Color.White)
-                                    } else {
-                                        Text("Enviar document", color = Color.White, fontSize = 13.sp)
-                                    }
-                                }
+                                    colorBoton = Color(0xFF856404)
+                                )
                             }
-                            if (errorEnvio.isNotEmpty()) {
+                        }
+                    }
+                    else -> {
+                        Card(
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF3CD))
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Text(
+                                    text = t.comptePendent,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 14.sp,
+                                    color = Color(0xFF856404)
+                                )
                                 Spacer(modifier = Modifier.height(4.dp))
-                                Text(text = errorEnvio, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
+                                Text(
+                                    text = t.comptePendentDesc,
+                                    fontSize = 13.sp,
+                                    color = Color(0xFF856404)
+                                )
+                                Spacer(modifier = Modifier.height(12.dp))
+                                BannerSubirDocumento(
+                                    nombreArchivo = nombreArchivo,
+                                    documentoSubido = documentoSubido,
+                                    subiendo = subiendo,
+                                    errorEnvio = errorEnvio,
+                                    textoSeleccionar = t.seleccionarDocument,
+                                    textoEnviar = t.enviarDocument,
+                                    textoEnviado = t.documentEnviat,
+                                    onSeleccionar = { launcher.launch("*/*") },
+                                    onEnviar = {
+                                        uriSeleccionada?.let { uri ->
+                                            subirDocumento(uri, crearNuevaSolicitud = false)
+                                        }
+                                    },
+                                    colorBoton = Color(0xFF856404)
+                                )
                             }
                         }
                     }
@@ -235,7 +331,6 @@ fun HomeScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            // Tarjetas
             Column(
                 modifier = Modifier.padding(horizontal = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -275,7 +370,6 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(88.dp))
         }
 
-        // FAB perfil
         FloatingActionButton(
             onClick = onNavigateToPerfil,
             modifier = Modifier
@@ -285,6 +379,53 @@ fun HomeScreen(
             contentColor = Color.White
         ) {
             Icon(Icons.Default.Person, contentDescription = t.miPerfil)
+        }
+    }
+}
+
+@Composable
+fun BannerSubirDocumento(
+    nombreArchivo: String,
+    documentoSubido: Boolean,
+    subiendo: Boolean,
+    errorEnvio: String,
+    textoSeleccionar: String,
+    textoEnviar: String,
+    textoEnviado: String,
+    onSeleccionar: () -> Unit,
+    onEnviar: () -> Unit,
+    colorBoton: Color
+) {
+    if (documentoSubido) {
+        Text(text = textoEnviado, fontSize = 13.sp, color = Color(0xFF856404))
+    } else {
+        OutlinedButton(
+            onClick = onSeleccionar,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = if (nombreArchivo.isEmpty()) textoSeleccionar else "📄 $nombreArchivo",
+                fontSize = 13.sp
+            )
+        }
+        if (nombreArchivo.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Button(
+                onClick = onEnviar,
+                enabled = !subiendo,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = colorBoton)
+            ) {
+                if (subiendo) {
+                    CircularProgressIndicator(modifier = Modifier.size(16.dp), color = Color.White)
+                } else {
+                    Text(textoEnviar, color = Color.White, fontSize = 13.sp)
+                }
+            }
+        }
+        if (errorEnvio.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(text = errorEnvio, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
         }
     }
 }

@@ -2,10 +2,20 @@ package com.example.aprxtiva.repository
 
 import com.example.aprxtiva.api.RetrofitClient
 import com.example.aprxtiva.entities.DerechoAcceso
+import org.json.JSONObject
 
 class DerechoRepository(private val token: String) {
 
     private val api = RetrofitClient.getClient(token)
+
+    private fun parsearError(errorBody: okhttp3.ResponseBody?): String {
+        return try {
+            val json = JSONObject(errorBody?.string() ?: "")
+            json.optString("mensaje", "Error desconocido")
+        } catch (e: Exception) {
+            "Error desconocido"
+        }
+    }
 
     suspend fun getMisDerechos(): Result<List<DerechoAcceso>> {
         return try {
@@ -13,10 +23,10 @@ class DerechoRepository(private val token: String) {
             if (response.isSuccessful && response.body() != null) {
                 Result.success(response.body()!!)
             } else {
-                Result.failure(Exception("Error al cargar derechos"))
+                Result.failure(Exception(parsearError(response.errorBody())))
             }
         } catch (e: Exception) {
-            Result.failure(Exception("Error de conexión"))
+            Result.failure(Exception("Error de connexió"))
         }
     }
 
@@ -28,10 +38,10 @@ class DerechoRepository(private val token: String) {
             if (response.isSuccessful && response.body() != null) {
                 Result.success(response.body()!!)
             } else {
-                Result.failure(Exception("Error al crear derecho permanente"))
+                Result.failure(Exception(parsearError(response.errorBody())))
             }
         } catch (e: Exception) {
-            Result.failure(Exception("Error de conexión"))
+            Result.failure(Exception("Error de connexió"))
         }
     }
 
@@ -46,10 +56,10 @@ class DerechoRepository(private val token: String) {
             if (response.isSuccessful && response.body() != null) {
                 Result.success(response.body()!!)
             } else {
-                Result.failure(Exception("Error al crear derecho puntual"))
+                Result.failure(Exception(parsearError(response.errorBody())))
             }
         } catch (e: Exception) {
-            Result.failure(Exception("Error de conexión"))
+            Result.failure(Exception("Error de connexió"))
         }
     }
 
@@ -59,10 +69,10 @@ class DerechoRepository(private val token: String) {
             if (response.isSuccessful) {
                 Result.success(Unit)
             } else {
-                Result.failure(Exception("Error al eliminar derecho"))
+                Result.failure(Exception(parsearError(response.errorBody())))
             }
         } catch (e: Exception) {
-            Result.failure(Exception("Error de conexión"))
+            Result.failure(Exception("Error de connexió"))
         }
     }
 }

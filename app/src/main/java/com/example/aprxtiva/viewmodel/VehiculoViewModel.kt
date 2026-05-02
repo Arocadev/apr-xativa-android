@@ -21,6 +21,11 @@ class VehiculoViewModel(application: Application) : AndroidViewModel(application
     private val _estado = MutableStateFlow<EstadoUI>(EstadoUI.Idle)
     val estado: StateFlow<EstadoUI> = _estado
 
+    private val _errorMensaje = MutableStateFlow<String?>(null)
+    val errorMensaje: StateFlow<String?> = _errorMensaje
+
+    fun limpiarError() { _errorMensaje.value = null }
+
     fun cargarVehiculos() {
         viewModelScope.launch {
             _estado.value = EstadoUI.Loading
@@ -43,7 +48,8 @@ class VehiculoViewModel(application: Application) : AndroidViewModel(application
             if (result.isSuccess) {
                 cargarVehiculos()
             } else {
-                _estado.value = EstadoUI.Error(result.exceptionOrNull()?.message ?: "Error")
+                _estado.value = EstadoUI.Idle
+                _errorMensaje.value = result.exceptionOrNull()?.message ?: "Error"
             }
         }
     }
@@ -52,17 +58,17 @@ class VehiculoViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch {
             val token = tokenManager.token.first() ?: return@launch
             val result = VehiculoRepository(token).deleteVehiculo(id)
-            if (result.isSuccess) {
-                cargarVehiculos()
-            } else {
-                _estado.value = EstadoUI.Error(result.exceptionOrNull()?.message ?: "Error")
-            }
+            if (result.isSuccess) cargarVehiculos()
+            else _estado.value = EstadoUI.Error(result.exceptionOrNull()?.message ?: "Error")
         }
     }
-}
 
-sealed class EstadoUI {
-    object Idle : EstadoUI()
-    object Loading : EstadoUI()
-    data class Error(val message: String) : EstadoUI()
+    fun reactivarVehiculo(id: Long) {
+        viewModelScope.launch {
+            val token = tokenManager.token.first() ?: return@launch
+            val result = VehiculoRepository(token).reactivarVehiculo(id)
+            if (result.isSuccess) cargarVehiculos()
+            else _errorMensaje.value = result.exceptionOrNull()?.message ?: "Error"
+        }
+    }
 }

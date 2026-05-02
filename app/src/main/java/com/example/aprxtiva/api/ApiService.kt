@@ -58,4 +58,7 @@ interface ApiService {
     @Multipart
     @POST("api/documentos/subir")
     suspend fun subirDocumento(@Part archivo: MultipartBody.Part): Response<Void>
+
+    @PUT("api/vehiculos/{id}/reactivar")
+    suspend fun reactivarVehiculo(@Path("id") id: Long): Response<Void>
 }

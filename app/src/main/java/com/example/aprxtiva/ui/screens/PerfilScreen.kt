@@ -29,6 +29,7 @@ import com.example.aprxtiva.utils.TokenManager
 import com.example.aprxtiva.viewmodel.AuthViewModel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,9 +60,7 @@ fun PerfilScreen(
     var exito by remember { mutableStateOf("") }
     var cargando by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        viewModel.cargarPerfil(context)
-    }
+    LaunchedEffect(Unit) { viewModel.cargarPerfil(context) }
 
     val fieldColors = OutlinedTextFieldDefaults.colors(
         focusedBorderColor = Color(0xFFC0392B),
@@ -101,41 +100,22 @@ fun PerfilScreen(
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Avatar
             Box(
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFFFFF0EE)),
+                modifier = Modifier.size(80.dp).clip(CircleShape).background(Color(0xFFFFF0EE)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    Icons.Default.Person,
-                    contentDescription = null,
-                    modifier = Modifier.size(44.dp),
-                    tint = Color(0xFFC0392B)
-                )
+                Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.size(44.dp), tint = Color(0xFFC0392B))
             }
 
             Spacer(modifier = Modifier.height(12.dp))
 
             if (perfilNombre.isNotEmpty()) {
-                Text(
-                    text = "$perfilNombre $perfilApellidos",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = colorTexto
-                )
+                Text(text = "$perfilNombre $perfilApellidos", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = colorTexto)
             }
-            Text(
-                text = email ?: "",
-                fontSize = 14.sp,
-                color = colorSubtexto
-            )
+            Text(text = email ?: "", fontSize = 14.sp, color = colorSubtexto)
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Card datos
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -143,32 +123,16 @@ fun PerfilScreen(
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
-                    Text(
-                        text = t.dadesCompte,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 15.sp,
-                        color = Color(0xFFC0392B),
-                        modifier = Modifier.padding(bottom = 12.dp)
-                    )
+                    Text(text = t.dadesCompte, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color(0xFFC0392B), modifier = Modifier.padding(bottom = 12.dp))
                     if (perfilDni.isNotEmpty()) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
+                        Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                             Text(text = t.dni, fontSize = 14.sp, color = colorSubtexto)
                             Text(text = perfilDni, fontSize = 14.sp, fontWeight = FontWeight.Medium, color = colorTexto)
                         }
                         HorizontalDivider(color = colorSubtexto.copy(alpha = 0.2f))
                     }
                     if (perfilTipo.isNotEmpty()) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
+                        Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                             Text(text = t.tipo, fontSize = 14.sp, color = colorSubtexto)
                             Text(text = perfilTipo, fontSize = 14.sp, fontWeight = FontWeight.Medium, color = colorTexto)
                         }
@@ -178,7 +142,6 @@ fun PerfilScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Card cambiar contraseña
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -186,45 +149,12 @@ fun PerfilScreen(
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
-                    Text(
-                        text = t.cambiarContrasena,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 15.sp,
-                        color = Color(0xFFC0392B),
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
-                    OutlinedTextField(
-                        value = passwordActual,
-                        onValueChange = { passwordActual = it },
-                        label = { Text(t.contrasenaActual) },
-                        singleLine = true,
-                        visualTransformation = PasswordVisualTransformation(),
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = fieldColors
-                    )
+                    Text(text = t.cambiarContrasena, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color(0xFFC0392B), modifier = Modifier.padding(bottom = 16.dp))
+                    OutlinedTextField(value = passwordActual, onValueChange = { passwordActual = it }, label = { Text(t.contrasenaActual) }, singleLine = true, visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), colors = fieldColors)
                     Spacer(modifier = Modifier.height(10.dp))
-                    OutlinedTextField(
-                        value = passwordNueva,
-                        onValueChange = { passwordNueva = it },
-                        label = { Text(t.contrasenaNueva) },
-                        singleLine = true,
-                        visualTransformation = PasswordVisualTransformation(),
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = fieldColors
-                    )
+                    OutlinedTextField(value = passwordNueva, onValueChange = { passwordNueva = it }, label = { Text(t.contrasenaNueva) }, singleLine = true, visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), colors = fieldColors)
                     Spacer(modifier = Modifier.height(10.dp))
-                    OutlinedTextField(
-                        value = passwordConfirm,
-                        onValueChange = { passwordConfirm = it },
-                        label = { Text(t.confirmarContrasena) },
-                        singleLine = true,
-                        visualTransformation = PasswordVisualTransformation(),
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = fieldColors
-                    )
+                    OutlinedTextField(value = passwordConfirm, onValueChange = { passwordConfirm = it }, label = { Text(t.confirmarContrasena) }, singleLine = true, visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), colors = fieldColors)
 
                     if (error.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(8.dp))
@@ -241,6 +171,14 @@ fun PerfilScreen(
                         onClick = {
                             error = ""
                             exito = ""
+                            if (passwordActual.isBlank() || passwordNueva.isBlank() || passwordConfirm.isBlank()) {
+                                error = t.campsObligatoris
+                                return@Button
+                            }
+                            if (passwordNueva == passwordActual) {
+                                error = t.contrasenaMatixa
+                                return@Button
+                            }
                             if (passwordNueva != passwordConfirm) {
                                 error = t.contrasenasCoincidenError
                                 return@Button
@@ -250,16 +188,20 @@ fun PerfilScreen(
                                 try {
                                     val token = TokenManager(context).token.first() ?: return@launch
                                     val api = RetrofitClient.getClient(token)
-                                    val response = api.cambiarPassword(
-                                        CambiarPasswordRequest(passwordActual, passwordNueva)
-                                    )
+                                    val response = api.cambiarPassword(CambiarPasswordRequest(passwordActual, passwordNueva))
                                     if (response.isSuccessful) {
                                         exito = t.contrasenaExito
                                         passwordActual = ""
                                         passwordNueva = ""
                                         passwordConfirm = ""
                                     } else {
-                                        error = t.errorCambiarContrasena
+                                        val mensaje = try {
+                                            val json = JSONObject(response.errorBody()?.string() ?: "")
+                                            json.getString("mensaje")
+                                        } catch (e: Exception) {
+                                            t.errorCambiarContrasena
+                                        }
+                                        error = mensaje
                                     }
                                 } catch (e: Exception) {
                                     error = t.errorConexion
@@ -268,18 +210,13 @@ fun PerfilScreen(
                                 }
                             }
                         },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(50.dp),
+                        modifier = Modifier.fillMaxWidth().height(50.dp),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC0392B)),
                         enabled = !cargando
                     ) {
-                        if (cargando) {
-                            CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Color.White)
-                        } else {
-                            Text(t.cambiarContrasena, color = Color.White, fontWeight = FontWeight.SemiBold)
-                        }
+                        if (cargando) CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Color.White)
+                        else Text(t.cambiarContrasena, color = Color.White, fontWeight = FontWeight.SemiBold)
                     }
                 }
             }

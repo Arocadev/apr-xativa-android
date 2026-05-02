@@ -42,6 +42,7 @@ fun DerechosScreen(
     val t = IdiomaManager.textos
     val derechos by viewModel.derechos.collectAsState()
     val estado by viewModel.estado.collectAsState()
+    val errorMensaje by viewModel.errorMensaje.collectAsState()
     val vehiculos by vehiculoViewModel.vehiculos.collectAsState()
 
     var mostrarFormulario by remember { mutableStateOf(false) }
@@ -76,17 +77,13 @@ fun DerechosScreen(
         selectableDates = object : SelectableDates {
             override fun isSelectableDate(utcTimeMillis: Long): Boolean {
                 val hoy = Calendar.getInstance().apply {
-                    set(Calendar.HOUR_OF_DAY, 0)
-                    set(Calendar.MINUTE, 0)
-                    set(Calendar.SECOND, 0)
-                    set(Calendar.MILLISECOND, 0)
+                    set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
                 }.timeInMillis
                 val mesSiguiente = Calendar.getInstance().apply {
                     add(Calendar.MONTH, 1)
                     set(Calendar.DAY_OF_MONTH, getActualMaximum(Calendar.DAY_OF_MONTH))
-                    set(Calendar.HOUR_OF_DAY, 23)
-                    set(Calendar.MINUTE, 59)
-                    set(Calendar.SECOND, 59)
+                    set(Calendar.HOUR_OF_DAY, 23); set(Calendar.MINUTE, 59); set(Calendar.SECOND, 59)
                 }.timeInMillis
                 return utcTimeMillis >= hoy && utcTimeMillis <= mesSiguiente
             }
@@ -99,15 +96,12 @@ fun DerechosScreen(
             confirmButton = {
                 TextButton(onClick = {
                     datePickerState.selectedDateMillis?.let { millis ->
-                        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                        fechaAcceso = sdf.format(Date(millis))
+                        fechaAcceso = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(millis))
                     }
                     mostrarDatePicker = false
                 }) { Text(t.confirmar) }
             },
-            dismissButton = {
-                TextButton(onClick = { mostrarDatePicker = false }) { Text(t.cancelar) }
-            }
+            dismissButton = { TextButton(onClick = { mostrarDatePicker = false }) { Text(t.cancelar) } }
         ) { DatePicker(state = datePickerState) }
     }
 
@@ -126,6 +120,16 @@ fun DerechosScreen(
             title = { Text(t.fecha, fontWeight = FontWeight.Bold) },
             text = { Text(t.infoDerechoPuntual, lineHeight = 22.sp) },
             confirmButton = { TextButton(onClick = { mostrarInfoFechaPuntual = false }) { Text(t.cancelar) } }
+        )
+    }
+
+    // Dialog error límite o cualquier error
+    if (errorMensaje != null) {
+        AlertDialog(
+            onDismissRequest = { viewModel.limpiarError() },
+            title = { Text(t.error, fontWeight = FontWeight.Bold) },
+            text = { Text(errorMensaje!!, lineHeight = 22.sp) },
+            confirmButton = { TextButton(onClick = { viewModel.limpiarError() }) { Text(t.confirmar) } }
         )
     }
 
@@ -160,7 +164,6 @@ fun DerechosScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Formulario
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -168,50 +171,18 @@ fun DerechosScreen(
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
-                    Text(
-                        text = t.nouDret,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        color = Color(0xFFC0392B),
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
+                    Text(text = t.nouDret, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color(0xFFC0392B), modifier = Modifier.padding(bottom = 16.dp))
 
                     if (mostrarFormulario) {
-                        // Tipo derecho
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            ExposedDropdownMenuBox(
-                                expanded = expandedTipo,
-                                onExpandedChange = { expandedTipo = !expandedTipo },
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                OutlinedTextField(
-                                    value = tipoDerecho,
-                                    onValueChange = {},
-                                    readOnly = true,
-                                    label = { Text(t.tipoDerecho) },
-                                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedTipo) },
-                                    modifier = Modifier.fillMaxWidth().menuAnchor(),
-                                    shape = RoundedCornerShape(12.dp),
-                                    colors = fieldColors
-                                )
-                                ExposedDropdownMenu(
-                                    expanded = expandedTipo,
-                                    onDismissRequest = { expandedTipo = false }
-                                ) {
+                        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            ExposedDropdownMenuBox(expanded = expandedTipo, onExpandedChange = { expandedTipo = !expandedTipo }, modifier = Modifier.weight(1f)) {
+                                OutlinedTextField(value = tipoDerecho, onValueChange = {}, readOnly = true, label = { Text(t.tipoDerecho) }, trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedTipo) }, modifier = Modifier.fillMaxWidth().menuAnchor(), shape = RoundedCornerShape(12.dp), colors = fieldColors)
+                                ExposedDropdownMenu(expanded = expandedTipo, onDismissRequest = { expandedTipo = false }) {
                                     listOf("PERMANENTE" to t.permanent, "PUNTUAL" to t.puntual).forEach { (valor, etiqueta) ->
-                                        DropdownMenuItem(
-                                            text = { Text(etiqueta) },
-                                            onClick = {
-                                                tipoDerecho = valor
-                                                expandedTipo = false
-                                                vehiculoSeleccionado = null
-                                                matriculaInvitado = ""
-                                                fechaAcceso = ""
-                                            }
-                                        )
+                                        DropdownMenuItem(text = { Text(etiqueta) }, onClick = {
+                                            tipoDerecho = valor; expandedTipo = false
+                                            vehiculoSeleccionado = null; matriculaInvitado = ""; fechaAcceso = ""
+                                        })
                                     }
                                 }
                             }
@@ -223,73 +194,27 @@ fun DerechosScreen(
                         Spacer(modifier = Modifier.height(12.dp))
 
                         if (tipoDerecho == "PERMANENTE") {
-                            ExposedDropdownMenuBox(
-                                expanded = expandedVehiculo,
-                                onExpandedChange = { expandedVehiculo = !expandedVehiculo }
-                            ) {
-                                OutlinedTextField(
-                                    value = vehiculoSeleccionado?.matricula ?: "",
-                                    onValueChange = {},
-                                    readOnly = true,
-                                    label = { Text(t.matricula) },
-                                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedVehiculo) },
-                                    modifier = Modifier.fillMaxWidth().menuAnchor(),
-                                    shape = RoundedCornerShape(12.dp),
-                                    colors = fieldColors
-                                )
-                                ExposedDropdownMenu(
-                                    expanded = expandedVehiculo,
-                                    onDismissRequest = { expandedVehiculo = false }
-                                ) {
+                            ExposedDropdownMenuBox(expanded = expandedVehiculo, onExpandedChange = { expandedVehiculo = !expandedVehiculo }) {
+                                OutlinedTextField(value = vehiculoSeleccionado?.matricula ?: "", onValueChange = {}, readOnly = true, label = { Text(t.matricula) }, trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedVehiculo) }, modifier = Modifier.fillMaxWidth().menuAnchor(), shape = RoundedCornerShape(12.dp), colors = fieldColors)
+                                ExposedDropdownMenu(expanded = expandedVehiculo, onDismissRequest = { expandedVehiculo = false }) {
                                     if (vehiculos.isEmpty()) {
-                                        DropdownMenuItem(
-                                            text = { Text(t.sinVehiculos) },
-                                            onClick = { expandedVehiculo = false }
-                                        )
+                                        DropdownMenuItem(text = { Text(t.sinVehiculos) }, onClick = { expandedVehiculo = false })
                                     } else {
                                         vehiculos.forEach { vehiculo ->
-                                            DropdownMenuItem(
-                                                text = { Text("${vehiculo.matricula} — ${vehiculo.tipoAcred}") },
-                                                onClick = {
-                                                    vehiculoSeleccionado = vehiculo
-                                                    expandedVehiculo = false
-                                                }
-                                            )
+                                            DropdownMenuItem(text = { Text("${vehiculo.matricula} — ${vehiculo.tipoAcred}") }, onClick = { vehiculoSeleccionado = vehiculo; expandedVehiculo = false })
                                         }
                                     }
                                 }
                             }
                         } else {
-                            OutlinedTextField(
-                                value = matriculaInvitado,
-                                onValueChange = { matriculaInvitado = it.uppercase() },
-                                label = { Text(t.matricula) },
-                                singleLine = true,
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(12.dp),
-                                colors = fieldColors
-                            )
+                            OutlinedTextField(value = matriculaInvitado, onValueChange = { matriculaInvitado = it.uppercase() }, label = { Text(t.matricula) }, singleLine = true, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), colors = fieldColors)
                             Spacer(modifier = Modifier.height(10.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
+                            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                                 OutlinedTextField(
-                                    value = if (fechaAcceso.isEmpty()) "" else {
-                                        val parts = fechaAcceso.split("-")
-                                        if (parts.size == 3) "${parts[2]}/${parts[1]}/${parts[0]}" else fechaAcceso
-                                    },
-                                    onValueChange = {},
-                                    readOnly = true,
-                                    label = { Text(t.fecha) },
-                                    trailingIcon = {
-                                        IconButton(onClick = { mostrarDatePicker = true }) {
-                                            Icon(Icons.Default.DateRange, contentDescription = t.fecha)
-                                        }
-                                    },
-                                    modifier = Modifier.weight(1f),
-                                    shape = RoundedCornerShape(12.dp),
-                                    colors = fieldColors
+                                    value = if (fechaAcceso.isEmpty()) "" else { val p = fechaAcceso.split("-"); if (p.size == 3) "${p[2]}/${p[1]}/${p[0]}" else fechaAcceso },
+                                    onValueChange = {}, readOnly = true, label = { Text(t.fecha) },
+                                    trailingIcon = { IconButton(onClick = { mostrarDatePicker = true }) { Icon(Icons.Default.DateRange, contentDescription = t.fecha) } },
+                                    modifier = Modifier.weight(1f), shape = RoundedCornerShape(12.dp), colors = fieldColors
                                 )
                                 IconButton(onClick = { mostrarInfoFechaPuntual = true }) {
                                     Icon(Icons.Default.Info, contentDescription = "Info", tint = Color(0xFFC0392B))
@@ -319,8 +244,7 @@ fun DerechosScreen(
                             modifier = Modifier.fillMaxWidth().height(50.dp),
                             shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC0392B)),
-                            enabled = if (tipoDerecho == "PERMANENTE") vehiculoSeleccionado != null
-                            else matriculaInvitado.isNotBlank() && fechaAcceso.isNotBlank()
+                            enabled = if (tipoDerecho == "PERMANENTE") vehiculoSeleccionado != null else matriculaInvitado.isNotBlank() && fechaAcceso.isNotBlank()
                         ) {
                             Text(t.confirmar, fontWeight = FontWeight.SemiBold, color = Color.White)
                         }
@@ -328,17 +252,10 @@ fun DerechosScreen(
                         Spacer(modifier = Modifier.height(8.dp))
 
                         OutlinedButton(
-                            onClick = {
-                                mostrarFormulario = false
-                                vehiculoSeleccionado = null
-                                matriculaInvitado = ""
-                                fechaAcceso = ""
-                            },
+                            onClick = { mostrarFormulario = false; vehiculoSeleccionado = null; matriculaInvitado = ""; fechaAcceso = "" },
                             modifier = Modifier.fillMaxWidth().height(50.dp),
                             shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Text(t.cancelar, color = Color(0xFFC0392B))
-                        }
+                        ) { Text(t.cancelar, color = Color(0xFFC0392B)) }
 
                     } else {
                         Button(
@@ -346,14 +263,11 @@ fun DerechosScreen(
                             modifier = Modifier.fillMaxWidth().height(50.dp),
                             shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC0392B))
-                        ) {
-                            Text(t.nouDret, fontWeight = FontWeight.SemiBold, color = Color.White)
-                        }
+                        ) { Text(t.nouDret, fontWeight = FontWeight.SemiBold, color = Color.White) }
                     }
                 }
             }
 
-            // Lista derechos
             when {
                 estado is EstadoUI.Loading -> {
                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
@@ -361,15 +275,8 @@ fun DerechosScreen(
                     }
                 }
                 derechos.isEmpty() -> {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = colorCard)
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth().padding(32.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
+                    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = colorCard)) {
+                        Column(modifier = Modifier.fillMaxWidth().padding(32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(text = "🔑", fontSize = 40.sp)
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(text = t.sinDerechos, color = colorSubtexto, fontSize = 15.sp)
@@ -379,13 +286,7 @@ fun DerechosScreen(
                 else -> {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         derechos.forEach { derecho ->
-                            DerechoCard(
-                                derecho = derecho,
-                                t = t,
-                                colorCard = colorCard,
-                                colorTexto = colorTexto,
-                                colorSubtexto = colorSubtexto
-                            )
+                            DerechoCard(derecho = derecho, t = t, colorCard = colorCard, colorTexto = colorTexto, colorSubtexto = colorSubtexto)
                         }
                     }
                 }
@@ -408,61 +309,31 @@ fun DerechoCard(
         colors = CardDefaults.cardColors(containerColor = colorCard),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFFFFF0EE)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    Icons.Default.Lock,
-                    contentDescription = null,
-                    tint = Color(0xFFC0392B),
-                    modifier = Modifier.size(24.dp)
-                )
+        Row(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+            Box(modifier = Modifier.size(48.dp).clip(CircleShape).background(Color(0xFFFFF0EE)), contentAlignment = Alignment.Center) {
+                Icon(Icons.Default.Lock, contentDescription = null, tint = Color(0xFFC0392B), modifier = Modifier.size(24.dp))
             }
             Column(modifier = Modifier.weight(1f)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    // Muestra matrícula propia o matrícula invitado
                     Text(
-                        text = derecho.matricula.ifEmpty { derecho.matriculaInvitado ?: "" },
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        color = colorTexto
+                        text = when {
+                            derecho.matricula.isNotEmpty() -> derecho.matricula
+                            !derecho.matriculaInvitado.isNullOrEmpty() -> "${derecho.matriculaInvitado} (${t.convidat})"
+                            else -> "-"
+                        },
+                        fontWeight = FontWeight.Bold, fontSize = 16.sp, color = colorTexto
                     )
                     Text(
                         text = if (derecho.activo) t.activo else t.inactivo,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium,
+                        fontSize = 12.sp, fontWeight = FontWeight.Medium,
                         color = if (derecho.activo) Color(0xFF27AE60) else Color(0xFFC0392B)
                     )
                 }
-                Text(
-                    text = derecho.tipoDerecho,
-                    fontSize = 13.sp,
-                    color = Color(0xFFC0392B),
-                    fontWeight = FontWeight.Medium
-                )
-                Text(
-                    text = "${t.fechaInicio}: ${formatearFecha(derecho.fechaInicio)}",
-                    fontSize = 12.sp,
-                    color = colorSubtexto
-                )
+                Text(text = derecho.tipoDerecho, fontSize = 13.sp, color = Color(0xFFC0392B), fontWeight = FontWeight.Medium)
+                Text(text = "${t.fechaInicio}: ${formatearFecha(derecho.fechaInicio)}", fontSize = 12.sp, color = colorSubtexto)
                 if (derecho.fechaFin.isNotEmpty() && derecho.fechaFin != derecho.fechaInicio) {
-                    Text(
-                        text = "${t.fechaFin}: ${formatearFecha(derecho.fechaFin)}",
-                        fontSize = 12.sp,
-                        color = colorSubtexto
-                    )
+                    Text(text = "${t.fechaFin}: ${formatearFecha(derecho.fechaFin)}", fontSize = 12.sp, color = colorSubtexto)
                 }
             }
         }

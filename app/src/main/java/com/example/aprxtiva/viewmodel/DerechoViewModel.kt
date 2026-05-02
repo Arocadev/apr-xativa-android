@@ -21,6 +21,11 @@ class DerechoViewModel(application: Application) : AndroidViewModel(application)
     private val _estado = MutableStateFlow<EstadoUI>(EstadoUI.Idle)
     val estado: StateFlow<EstadoUI> = _estado
 
+    private val _errorMensaje = MutableStateFlow<String?>(null)
+    val errorMensaje: StateFlow<String?> = _errorMensaje
+
+    fun limpiarError() { _errorMensaje.value = null }
+
     fun cargarDerechos() {
         viewModelScope.launch {
             _estado.value = EstadoUI.Loading
@@ -43,7 +48,8 @@ class DerechoViewModel(application: Application) : AndroidViewModel(application)
             if (result.isSuccess) {
                 cargarDerechos()
             } else {
-                _estado.value = EstadoUI.Error(result.exceptionOrNull()?.message ?: "Error")
+                _estado.value = EstadoUI.Idle
+                _errorMensaje.value = result.exceptionOrNull()?.message ?: "Error"
             }
         }
     }
@@ -56,7 +62,8 @@ class DerechoViewModel(application: Application) : AndroidViewModel(application)
             if (result.isSuccess) {
                 cargarDerechos()
             } else {
-                _estado.value = EstadoUI.Error(result.exceptionOrNull()?.message ?: "Error")
+                _estado.value = EstadoUI.Idle
+                _errorMensaje.value = result.exceptionOrNull()?.message ?: "Error"
             }
         }
     }

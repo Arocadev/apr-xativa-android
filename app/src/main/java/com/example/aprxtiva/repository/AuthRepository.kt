@@ -5,6 +5,7 @@ import com.example.aprxtiva.entities.LoginRequest
 import com.example.aprxtiva.entities.LoginResponse
 import com.example.aprxtiva.entities.RegistroRequest
 import com.example.aprxtiva.entities.Usuario
+import org.json.JSONObject
 
 class AuthRepository(private val token: String? = null) {
 
@@ -16,10 +17,16 @@ class AuthRepository(private val token: String? = null) {
             if (response.isSuccessful && response.body() != null) {
                 Result.success(response.body()!!)
             } else {
-                Result.failure(Exception("DNI o contraseña incorrectos"))
+                val mensaje = try {
+                    val json = JSONObject(response.errorBody()?.string() ?: "")
+                    json.getString("mensaje")
+                } catch (e: Exception) {
+                    "DNI o contrasenya incorrectes"
+                }
+                Result.failure(Exception(mensaje))
             }
         } catch (e: Exception) {
-            Result.failure(Exception("Error de conexión"))
+            Result.failure(Exception("Error de connexió"))
         }
     }
 
@@ -36,10 +43,16 @@ class AuthRepository(private val token: String? = null) {
             if (response.isSuccessful && response.body() != null) {
                 Result.success(response.body()!!)
             } else {
-                Result.failure(Exception("Error al registrarse"))
+                val mensaje = try {
+                    val json = JSONObject(response.errorBody()?.string() ?: "")
+                    json.getString("mensaje")
+                } catch (e: Exception) {
+                    "Error al registrar-se"
+                }
+                Result.failure(Exception(mensaje))
             }
         } catch (e: Exception) {
-            Result.failure(Exception("Error de conexión"))
+            Result.failure(Exception("Error de connexió"))
         }
     }
 }

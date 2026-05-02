@@ -35,7 +35,7 @@ class MainActivity : ComponentActivity() {
                         SplashScreen(
                             onSplashFinished = {
                                 navController.navigate("login") {
-                                    popUpTo("splash") { inclusive = true }
+                                    popUpTo(0) { inclusive = true }
                                 }
                             }
                         )
@@ -44,7 +44,7 @@ class MainActivity : ComponentActivity() {
                         LoginScreen(
                             onLoginSuccess = {
                                 navController.navigate("home") {
-                                    popUpTo("login") { inclusive = true }
+                                    popUpTo(0) { inclusive = true }
                                 }
                             },
                             onNavigateToRegister = {
@@ -58,7 +58,7 @@ class MainActivity : ComponentActivity() {
                         RegisterScreen(
                             onRegistroSuccess = {
                                 navController.navigate("login") {
-                                    popUpTo("registro") { inclusive = true }
+                                    popUpTo(0) { inclusive = true }
                                 }
                             },
                             onNavigateToLogin = {
@@ -76,7 +76,7 @@ class MainActivity : ComponentActivity() {
                             onNavigateToGuia = { navController.navigate("guia") },
                             onLogout = {
                                 navController.navigate("login") {
-                                    popUpTo("home") { inclusive = true }
+                                    popUpTo(0) { inclusive = true }
                                 }
                             },
                             viewModel = authViewModel,
@@ -98,7 +98,7 @@ class MainActivity : ComponentActivity() {
                             onVolver = { navController.popBackStack() },
                             onLogout = {
                                 navController.navigate("login") {
-                                    popUpTo("home") { inclusive = true }
+                                    popUpTo(0) { inclusive = true }
                                 }
                             },
                             viewModel = authViewModel
@@ -109,7 +109,7 @@ class MainActivity : ComponentActivity() {
                             onVolver = { navController.popBackStack() },
                             onLogout = {
                                 navController.navigate("login") {
-                                    popUpTo("home") { inclusive = true }
+                                    popUpTo(0) { inclusive = true }
                                 }
                             },
                             onGuia = { navController.navigate("guia") },
