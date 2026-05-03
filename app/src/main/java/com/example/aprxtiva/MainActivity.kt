@@ -75,9 +75,7 @@ class MainActivity : ComponentActivity() {
                             onNavigateToAjustes = { navController.navigate("opciones") },
                             onNavigateToGuia = { navController.navigate("guia") },
                             onLogout = {
-                                navController.navigate("login") {
-                                    popUpTo(0) { inclusive = true }
-                                }
+                                finish()
                             },
                             viewModel = authViewModel,
                             esLandscape = esLandscape

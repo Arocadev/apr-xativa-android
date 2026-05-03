@@ -49,6 +49,10 @@ fun RegisterScreen(
 
     val tipos = listOf("A.1", "A.2", "A.3", "B", "C", "D", "E", "F", "G", "H.1", "H.2")
 
+    LaunchedEffect(Unit) {
+        viewModel.resetRegistroState()
+    }
+
     LaunchedEffect(registroState) {
         if (registroState is RegistroState.Success) {
             snackbarHostState.showSnackbar(

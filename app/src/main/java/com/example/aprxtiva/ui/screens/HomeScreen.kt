@@ -90,8 +90,8 @@ fun HomeScreen(
         }
     }
 
-    LaunchedEffect(activo) {
-        if (!activo) {
+    LaunchedEffect(activo, saliendo) {
+        if (!activo && !saliendo) {
             while (!saliendo) {
                 try {
                     val token = TokenManager(context).token.first()

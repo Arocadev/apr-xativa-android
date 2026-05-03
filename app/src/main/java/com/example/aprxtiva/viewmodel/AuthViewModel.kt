@@ -92,6 +92,14 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun resetLoginState() {
+        _loginState.value = LoginState.Idle
+    }
+
+    fun resetRegistroState() {
+        _registroState.value = RegistroState.Idle
+    }
+
     fun logout() {
         viewModelScope.launch {
             tokenManager.cerrarSesion()
