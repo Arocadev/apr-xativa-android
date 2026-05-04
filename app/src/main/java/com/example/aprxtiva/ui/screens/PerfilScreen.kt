@@ -9,6 +9,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -56,6 +59,9 @@ fun PerfilScreen(
     var passwordActual by remember { mutableStateOf("") }
     var passwordNueva by remember { mutableStateOf("") }
     var passwordConfirm by remember { mutableStateOf("") }
+    var mostrarPasswordActual by remember { mutableStateOf(false) }
+    var mostrarPasswordNueva by remember { mutableStateOf(false) }
+    var mostrarPasswordConfirm by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf("") }
     var exito by remember { mutableStateOf("") }
     var cargando by remember { mutableStateOf(false) }
@@ -150,11 +156,70 @@ fun PerfilScreen(
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
                     Text(text = t.cambiarContrasena, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color(0xFFC0392B), modifier = Modifier.padding(bottom = 16.dp))
-                    OutlinedTextField(value = passwordActual, onValueChange = { passwordActual = it }, label = { Text(t.contrasenaActual) }, singleLine = true, visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), colors = fieldColors)
+
+                    OutlinedTextField(
+                        value = passwordActual,
+                        onValueChange = { passwordActual = it },
+                        label = { Text(t.contrasenaActual) },
+                        singleLine = true,
+                        visualTransformation = if (mostrarPasswordActual) VisualTransformation.None else PasswordVisualTransformation(),
+                        trailingIcon = {
+                            IconButton(onClick = { mostrarPasswordActual = !mostrarPasswordActual }) {
+                                Icon(
+                                    imageVector = if (mostrarPasswordActual) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                    contentDescription = null,
+                                    tint = colorSubtexto
+                                )
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = fieldColors
+                    )
+
                     Spacer(modifier = Modifier.height(10.dp))
-                    OutlinedTextField(value = passwordNueva, onValueChange = { passwordNueva = it }, label = { Text(t.contrasenaNueva) }, singleLine = true, visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), colors = fieldColors)
+
+                    OutlinedTextField(
+                        value = passwordNueva,
+                        onValueChange = { passwordNueva = it },
+                        label = { Text(t.contrasenaNueva) },
+                        singleLine = true,
+                        visualTransformation = if (mostrarPasswordNueva) VisualTransformation.None else PasswordVisualTransformation(),
+                        trailingIcon = {
+                            IconButton(onClick = { mostrarPasswordNueva = !mostrarPasswordNueva }) {
+                                Icon(
+                                    imageVector = if (mostrarPasswordNueva) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                    contentDescription = null,
+                                    tint = colorSubtexto
+                                )
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = fieldColors
+                    )
+
                     Spacer(modifier = Modifier.height(10.dp))
-                    OutlinedTextField(value = passwordConfirm, onValueChange = { passwordConfirm = it }, label = { Text(t.confirmarContrasena) }, singleLine = true, visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), colors = fieldColors)
+
+                    OutlinedTextField(
+                        value = passwordConfirm,
+                        onValueChange = { passwordConfirm = it },
+                        label = { Text(t.confirmarContrasena) },
+                        singleLine = true,
+                        visualTransformation = if (mostrarPasswordConfirm) VisualTransformation.None else PasswordVisualTransformation(),
+                        trailingIcon = {
+                            IconButton(onClick = { mostrarPasswordConfirm = !mostrarPasswordConfirm }) {
+                                Icon(
+                                    imageVector = if (mostrarPasswordConfirm) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                    contentDescription = null,
+                                    tint = colorSubtexto
+                                )
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = fieldColors
+                    )
 
                     if (error.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(8.dp))

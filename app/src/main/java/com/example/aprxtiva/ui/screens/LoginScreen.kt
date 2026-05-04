@@ -6,6 +6,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -14,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,6 +36,7 @@ fun LoginScreen(
 ) {
     var dni by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var mostrarPassword by remember { mutableStateOf(false) }
     var mostrarMensajeContrasena by remember { mutableStateOf(false) }
     val loginState by viewModel.loginState.collectAsState()
     val t = IdiomaManager.textos
@@ -120,8 +125,17 @@ fun LoginScreen(
                 onValueChange = { password = it },
                 label = { Text(t.contrasena, color = colorSubtexto) },
                 singleLine = true,
-                visualTransformation = PasswordVisualTransformation(),
+                visualTransformation = if (mostrarPassword) VisualTransformation.None else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                trailingIcon = {
+                    IconButton(onClick = { mostrarPassword = !mostrarPassword }) {
+                        Icon(
+                            imageVector = if (mostrarPassword) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                            contentDescription = if (mostrarPassword) "Ocultar contraseña" else "Mostrar contraseña",
+                            tint = colorSubtexto
+                        )
+                    }
+                },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
