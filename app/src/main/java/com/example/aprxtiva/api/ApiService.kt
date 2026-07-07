@@ -11,6 +11,12 @@ interface ApiService {
     @POST("api/auth/login")
     suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
 
+    @POST("api/auth/refresh")
+    suspend fun refresh(@Body request: RefreshRequest): Response<LoginResponse>
+
+    @POST("api/auth/logout")
+    suspend fun logout(): Response<Void>
+
     @POST("api/usuarios/registro")
     suspend fun registro(@Body request: RegistroRequest): Response<Usuario>
 
@@ -30,6 +36,9 @@ interface ApiService {
 
     @DELETE("api/vehiculos/{id}")
     suspend fun deleteVehiculo(@Path("id") id: Long): Response<Void>
+
+    @PUT("api/vehiculos/{id}/reactivar")
+    suspend fun reactivarVehiculo(@Path("id") id: Long): Response<Void>
 
     // Solicitudes
     @POST("api/solicitudes")
@@ -58,7 +67,4 @@ interface ApiService {
     @Multipart
     @POST("api/documentos/subir")
     suspend fun subirDocumento(@Part archivo: MultipartBody.Part): Response<Void>
-
-    @PUT("api/vehiculos/{id}/reactivar")
-    suspend fun reactivarVehiculo(@Path("id") id: Long): Response<Void>
 }

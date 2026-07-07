@@ -29,13 +29,17 @@ class VehiculoViewModel(application: Application) : AndroidViewModel(application
     fun cargarVehiculos() {
         viewModelScope.launch {
             _estado.value = EstadoUI.Loading
-            val token = tokenManager.token.first() ?: return@launch
+            val token = tokenManager.token.first() ?: run {
+                _estado.value = EstadoUI.Error("Sessió no vàlida")
+                return@launch
+            }
             val result = VehiculoRepository(token).getVehiculos()
             if (result.isSuccess) {
                 _vehiculos.value = result.getOrNull() ?: emptyList()
-                _estado.value = EstadoUI.Idle
+                _estado.value = EstadoUI.Success
             } else {
-                _estado.value = EstadoUI.Error(result.exceptionOrNull()?.message ?: "Error")
+                _estado.value = EstadoUI.Error(result.exceptionOrNull()?.message ?: "Error al carregar vehicles")
+                _errorMensaje.value = result.exceptionOrNull()?.message ?: "Error al carregar vehicles"
             }
         }
     }
@@ -48,8 +52,8 @@ class VehiculoViewModel(application: Application) : AndroidViewModel(application
             if (result.isSuccess) {
                 cargarVehiculos()
             } else {
-                _estado.value = EstadoUI.Idle
-                _errorMensaje.value = result.exceptionOrNull()?.message ?: "Error"
+                _estado.value = EstadoUI.Success
+                _errorMensaje.value = result.exceptionOrNull()?.message ?: "Error al afegir vehicle"
             }
         }
     }
@@ -58,8 +62,11 @@ class VehiculoViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch {
             val token = tokenManager.token.first() ?: return@launch
             val result = VehiculoRepository(token).deleteVehiculo(id)
-            if (result.isSuccess) cargarVehiculos()
-            else _estado.value = EstadoUI.Error(result.exceptionOrNull()?.message ?: "Error")
+            if (result.isSuccess) {
+                cargarVehiculos()
+            } else {
+                _errorMensaje.value = result.exceptionOrNull()?.message ?: "Error al eliminar vehicle"
+            }
         }
     }
 
@@ -67,8 +74,11 @@ class VehiculoViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch {
             val token = tokenManager.token.first() ?: return@launch
             val result = VehiculoRepository(token).reactivarVehiculo(id)
-            if (result.isSuccess) cargarVehiculos()
-            else _errorMensaje.value = result.exceptionOrNull()?.message ?: "Error"
+            if (result.isSuccess) {
+                cargarVehiculos()
+            } else {
+                _errorMensaje.value = result.exceptionOrNull()?.message ?: "Error al reactivar vehicle"
+            }
         }
     }
 }

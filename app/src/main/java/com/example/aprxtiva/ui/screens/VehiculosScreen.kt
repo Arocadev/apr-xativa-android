@@ -11,6 +11,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,6 +43,7 @@ fun VehiculosScreen(
     var expandedTipo by remember { mutableStateOf(false) }
     var confirmandoId by remember { mutableStateOf<Long?>(null) }
     var mostrarInfoTipoAcred by remember { mutableStateOf(false) }
+    val isRefreshing = estado is EstadoUI.Loading
 
     val oscuro = TemaManager.oscuro
     val colorFondo = if (oscuro) Color(0xFF1C1C1C) else Color(0xFFF8F7F5)
@@ -100,162 +102,154 @@ fun VehiculosScreen(
             )
         }
     ) { padding ->
-        Column(
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = { viewModel.cargarVehiculos() },
             modifier = Modifier
                 .fillMaxSize()
-                .background(colorFondo)
                 .padding(padding)
-                .padding(20.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = colorCard),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(colorFondo)
+                    .padding(20.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Column(modifier = Modifier.padding(20.dp)) {
-                    Text(
-                        text = t.addVehiculo,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        color = Color(0xFFC0392B),
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
-
-                    if (mostrarFormulario) {
-                        OutlinedTextField(
-                            value = matricula,
-                            onValueChange = { matricula = it.uppercase() },
-                            label = { Text(t.matricula) },
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = fieldColors
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = colorCard),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(modifier = Modifier.padding(20.dp)) {
+                        Text(
+                            text = t.addVehiculo,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp,
+                            color = Color(0xFFC0392B),
+                            modifier = Modifier.padding(bottom = 16.dp)
                         )
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            ExposedDropdownMenuBox(
-                                expanded = expandedTipo,
-                                onExpandedChange = { expandedTipo = !expandedTipo },
-                                modifier = Modifier.weight(1f)
+
+                        if (mostrarFormulario) {
+                            OutlinedTextField(
+                                value = matricula,
+                                onValueChange = { matricula = it.uppercase() },
+                                label = { Text(t.matricula) },
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = fieldColors
+                            )
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                OutlinedTextField(
-                                    value = tipoAcred,
-                                    onValueChange = {},
-                                    readOnly = true,
-                                    label = { Text(t.tipoAcred) },
-                                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedTipo) },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .menuAnchor(),
-                                    shape = RoundedCornerShape(12.dp),
-                                    colors = fieldColors
-                                )
-                                ExposedDropdownMenu(
+                                ExposedDropdownMenuBox(
                                     expanded = expandedTipo,
-                                    onDismissRequest = { expandedTipo = false }
+                                    onExpandedChange = { expandedTipo = !expandedTipo },
+                                    modifier = Modifier.weight(1f)
                                 ) {
-                                    listOf("LIBRE", "ACREDITADO").forEach { opcion ->
-                                        DropdownMenuItem(
-                                            text = { Text(opcion) },
-                                            onClick = { tipoAcred = opcion; expandedTipo = false }
-                                        )
+                                    OutlinedTextField(
+                                        value = tipoAcred,
+                                        onValueChange = {},
+                                        readOnly = true,
+                                        label = { Text(t.tipoAcred) },
+                                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedTipo) },
+                                        modifier = Modifier.fillMaxWidth().menuAnchor(),
+                                        shape = RoundedCornerShape(12.dp),
+                                        colors = fieldColors
+                                    )
+                                    ExposedDropdownMenu(
+                                        expanded = expandedTipo,
+                                        onDismissRequest = { expandedTipo = false }
+                                    ) {
+                                        listOf("LIBRE", "ACREDITADO").forEach { opcion ->
+                                            DropdownMenuItem(
+                                                text = { Text(opcion) },
+                                                onClick = { tipoAcred = opcion; expandedTipo = false }
+                                            )
+                                        }
                                     }
                                 }
-                            }
-                            IconButton(onClick = { mostrarInfoTipoAcred = true }) {
-                                Icon(Icons.Default.Info, contentDescription = "Info", tint = Color(0xFFC0392B))
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Button(
-                            onClick = {
-                                if (matricula.isNotBlank()) {
-                                    viewModel.addVehiculo(matricula, tipoAcred)
-                                    matricula = ""
-                                    mostrarFormulario = false
+                                IconButton(onClick = { mostrarInfoTipoAcred = true }) {
+                                    Icon(Icons.Default.Info, contentDescription = "Info", tint = Color(0xFFC0392B))
                                 }
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(50.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC0392B))
-                        ) {
-                            Text(t.confirmar, fontWeight = FontWeight.SemiBold, color = Color.White)
-                        }
-                        Spacer(modifier = Modifier.height(8.dp))
-                        OutlinedButton(
-                            onClick = { mostrarFormulario = false; matricula = "" },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(50.dp),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Text(t.cancelar, color = Color(0xFFC0392B))
-                        }
-                    } else {
-                        Button(
-                            onClick = { mostrarFormulario = true },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(50.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC0392B))
-                        ) {
-                            Text(t.addVehiculo, fontWeight = FontWeight.SemiBold, color = Color.White)
-                        }
-                    }
-                }
-            }
-
-            when {
-                estado is EstadoUI.Loading -> {
-                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(color = Color(0xFFC0392B))
-                    }
-                }
-                vehiculos.isEmpty() -> {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = colorCard)
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(32.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(text = "🚗", fontSize = 40.sp)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(text = t.sinVehiculos, color = colorSubtexto, fontSize = 15.sp)
-                        }
-                    }
-                }
-                else -> {
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        vehiculos.forEach { vehiculo ->
-                            VehiculoCard(
-                                vehiculo = vehiculo,
-                                confirmandoId = confirmandoId,
-                                onConfirmarEliminar = { confirmandoId = it },
-                                onCancelar = { confirmandoId = null },
-                                onEliminar = {
-                                    viewModel.deleteVehiculo(it)
-                                    confirmandoId = null
+                            }
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Button(
+                                onClick = {
+                                    if (matricula.isNotBlank()) {
+                                        viewModel.addVehiculo(matricula, tipoAcred)
+                                        matricula = ""
+                                        mostrarFormulario = false
+                                    }
                                 },
-                                onReactivar = { viewModel.reactivarVehiculo(it) },
-                                t = t,
-                                colorCard = colorCard,
-                                colorTexto = colorTexto,
-                                colorSubtexto = colorSubtexto
-                            )
+                                modifier = Modifier.fillMaxWidth().height(50.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC0392B))
+                            ) {
+                                Text(t.confirmar, fontWeight = FontWeight.SemiBold, color = Color.White)
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            OutlinedButton(
+                                onClick = { mostrarFormulario = false; matricula = "" },
+                                modifier = Modifier.fillMaxWidth().height(50.dp),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text(t.cancelar, color = Color(0xFFC0392B))
+                            }
+                        } else {
+                            Button(
+                                onClick = { mostrarFormulario = true },
+                                modifier = Modifier.fillMaxWidth().height(50.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC0392B))
+                            ) {
+                                Text(t.addVehiculo, fontWeight = FontWeight.SemiBold, color = Color.White)
+                            }
+                        }
+                    }
+                }
+
+                when {
+                    vehiculos.isEmpty() && estado !is EstadoUI.Loading -> {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = colorCard)
+                        ) {
+                            Column(
+                                modifier = Modifier.fillMaxWidth().padding(32.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(text = "🚗", fontSize = 40.sp)
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(text = t.sinVehiculos, color = colorSubtexto, fontSize = 15.sp)
+                            }
+                        }
+                    }
+                    else -> {
+                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            vehiculos.forEach { vehiculo ->
+                                VehiculoCard(
+                                    vehiculo = vehiculo,
+                                    confirmandoId = confirmandoId,
+                                    onConfirmarEliminar = { confirmandoId = it },
+                                    onCancelar = { confirmandoId = null },
+                                    onEliminar = {
+                                        viewModel.deleteVehiculo(it)
+                                        confirmandoId = null
+                                    },
+                                    onReactivar = { viewModel.reactivarVehiculo(it) },
+                                    t = t,
+                                    colorCard = colorCard,
+                                    colorTexto = colorTexto,
+                                    colorSubtexto = colorSubtexto
+                                )
+                            }
                         }
                     }
                 }
@@ -290,10 +284,7 @@ fun VehiculoCard(
                 horizontalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .background(Color(0xFFFFF0EE)),
+                    modifier = Modifier.size(48.dp).clip(CircleShape).background(Color(0xFFFFF0EE)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(

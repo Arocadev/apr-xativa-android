@@ -185,7 +185,7 @@ fun HomeScreen(
                         IconButton(onClick = {
                             saliendo = true
                             onLogout()
-                            scope.launch { viewModel.logout() }
+                            scope.launch { viewModel.logout(context) }
                         }) {
                             Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = t.cerrarSesion, tint = Color.White)
                         }

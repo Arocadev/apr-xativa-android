@@ -24,12 +24,19 @@ class SolicitudViewModel(application: Application) : AndroidViewModel(applicatio
     private val _estadoSolicitud = MutableStateFlow<Solicitud?>(null)
     val estadoSolicitud: StateFlow<Solicitud?> = _estadoSolicitud
 
+    private val _errorMensaje = MutableStateFlow<String?>(null)
+    val errorMensaje: StateFlow<String?> = _errorMensaje
+
+    fun limpiarError() { _errorMensaje.value = null }
+
     fun getEstadoSolicitud() {
         viewModelScope.launch {
             val token = tokenManager.token.first() ?: return@launch
             val result = SolicitudRepository(token).getEstadoSolicitud()
             if (result.isSuccess) {
                 _estadoSolicitud.value = result.getOrNull()
+            } else {
+                _errorMensaje.value = result.exceptionOrNull()?.message
             }
         }
     }
@@ -37,13 +44,17 @@ class SolicitudViewModel(application: Application) : AndroidViewModel(applicatio
     fun cargarSolicitudes() {
         viewModelScope.launch {
             _estado.value = EstadoUI.Loading
-            val token = tokenManager.token.first() ?: return@launch
+            val token = tokenManager.token.first() ?: run {
+                _estado.value = EstadoUI.Error("Sessió no vàlida")
+                return@launch
+            }
             val result = SolicitudRepository(token).getMisSolicitudes()
             if (result.isSuccess) {
                 _solicitudes.value = result.getOrNull() ?: emptyList()
-                _estado.value = EstadoUI.Idle
+                _estado.value = EstadoUI.Success
             } else {
-                _estado.value = EstadoUI.Error(result.exceptionOrNull()?.message ?: "Error")
+                _estado.value = EstadoUI.Error(result.exceptionOrNull()?.message ?: "Error al carregar sol·licituds")
+                _errorMensaje.value = result.exceptionOrNull()?.message
             }
         }
     }
@@ -56,7 +67,8 @@ class SolicitudViewModel(application: Application) : AndroidViewModel(applicatio
             if (result.isSuccess) {
                 cargarSolicitudes()
             } else {
-                _estado.value = EstadoUI.Error(result.exceptionOrNull()?.message ?: "Error")
+                _estado.value = EstadoUI.Error(result.exceptionOrNull()?.message ?: "Error al crear sol·licitud")
+                _errorMensaje.value = result.exceptionOrNull()?.message
             }
         }
     }

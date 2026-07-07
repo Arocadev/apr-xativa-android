@@ -8,10 +8,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
 
-    //Movil fisico
     private const val BASE_URL = "http://192.168.1.197:8080/"
-    //private const val BASE_URL = "http://10.20.36.57:8080/"
-    //Emulador android studio
+    // private const val BASE_URL = "http://10.20.36.57:8080/"
     // private const val BASE_URL = "http://10.0.2.2:8080/"
 
     private val logging = HttpLoggingInterceptor().apply {
@@ -23,9 +21,7 @@ object RetrofitClient {
             .addInterceptor(logging)
             .addInterceptor { chain ->
                 val request = chain.request().newBuilder().apply {
-                    if (token != null) {
-                        addHeader("Authorization", "Bearer $token")
-                    }
+                    if (token != null) addHeader("Authorization", "Bearer $token")
                 }.build()
                 chain.proceed(request)
             }

@@ -29,13 +29,17 @@ class DerechoViewModel(application: Application) : AndroidViewModel(application)
     fun cargarDerechos() {
         viewModelScope.launch {
             _estado.value = EstadoUI.Loading
-            val token = tokenManager.token.first() ?: return@launch
+            val token = tokenManager.token.first() ?: run {
+                _estado.value = EstadoUI.Error("Sessió no vàlida")
+                return@launch
+            }
             val result = DerechoRepository(token).getMisDerechos()
             if (result.isSuccess) {
                 _derechos.value = result.getOrNull() ?: emptyList()
-                _estado.value = EstadoUI.Idle
+                _estado.value = EstadoUI.Success
             } else {
-                _estado.value = EstadoUI.Error(result.exceptionOrNull()?.message ?: "Error")
+                _estado.value = EstadoUI.Error(result.exceptionOrNull()?.message ?: "Error al carregar drets")
+                _errorMensaje.value = result.exceptionOrNull()?.message ?: "Error al carregar drets"
             }
         }
     }
@@ -48,8 +52,8 @@ class DerechoViewModel(application: Application) : AndroidViewModel(application)
             if (result.isSuccess) {
                 cargarDerechos()
             } else {
-                _estado.value = EstadoUI.Idle
-                _errorMensaje.value = result.exceptionOrNull()?.message ?: "Error"
+                _estado.value = EstadoUI.Success
+                _errorMensaje.value = result.exceptionOrNull()?.message ?: "Error al crear dret permanent"
             }
         }
     }
@@ -62,8 +66,8 @@ class DerechoViewModel(application: Application) : AndroidViewModel(application)
             if (result.isSuccess) {
                 cargarDerechos()
             } else {
-                _estado.value = EstadoUI.Idle
-                _errorMensaje.value = result.exceptionOrNull()?.message ?: "Error"
+                _estado.value = EstadoUI.Success
+                _errorMensaje.value = result.exceptionOrNull()?.message ?: "Error al crear dret puntual"
             }
         }
     }
@@ -75,7 +79,7 @@ class DerechoViewModel(application: Application) : AndroidViewModel(application)
             if (result.isSuccess) {
                 cargarDerechos()
             } else {
-                _estado.value = EstadoUI.Error(result.exceptionOrNull()?.message ?: "Error")
+                _errorMensaje.value = result.exceptionOrNull()?.message ?: "Error al eliminar dret"
             }
         }
     }

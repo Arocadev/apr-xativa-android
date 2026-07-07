@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,6 +45,7 @@ fun DerechosScreen(
     val estado by viewModel.estado.collectAsState()
     val errorMensaje by viewModel.errorMensaje.collectAsState()
     val vehiculos by vehiculoViewModel.vehiculos.collectAsState()
+    val isRefreshing = estado is EstadoUI.Loading
 
     var mostrarFormulario by remember { mutableStateOf(false) }
     var tipoDerecho by remember { mutableStateOf("PERMANENTE") }
@@ -123,7 +125,6 @@ fun DerechosScreen(
         )
     }
 
-    // Dialog error límite o cualquier error
     if (errorMensaje != null) {
         AlertDialog(
             onDismissRequest = { viewModel.limpiarError() },
@@ -155,138 +156,143 @@ fun DerechosScreen(
             )
         }
     ) { padding ->
-        Column(
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = {
+                viewModel.cargarDerechos()
+                vehiculoViewModel.cargarVehiculos()
+            },
             modifier = Modifier
                 .fillMaxSize()
-                .background(colorFondo)
                 .padding(padding)
-                .padding(20.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = colorCard),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(colorFondo)
+                    .padding(20.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Column(modifier = Modifier.padding(20.dp)) {
-                    Text(text = t.nouDret, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color(0xFFC0392B), modifier = Modifier.padding(bottom = 16.dp))
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = colorCard),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(modifier = Modifier.padding(20.dp)) {
+                        Text(text = t.nouDret, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color(0xFFC0392B), modifier = Modifier.padding(bottom = 16.dp))
 
-                    if (mostrarFormulario) {
-                        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                            ExposedDropdownMenuBox(expanded = expandedTipo, onExpandedChange = { expandedTipo = !expandedTipo }, modifier = Modifier.weight(1f)) {
-                                OutlinedTextField(value = tipoDerecho, onValueChange = {}, readOnly = true, label = { Text(t.tipoDerecho) }, trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedTipo) }, modifier = Modifier.fillMaxWidth().menuAnchor(), shape = RoundedCornerShape(12.dp), colors = fieldColors)
-                                ExposedDropdownMenu(expanded = expandedTipo, onDismissRequest = { expandedTipo = false }) {
-                                    listOf("PERMANENTE" to t.permanent, "PUNTUAL" to t.puntual).forEach { (valor, etiqueta) ->
-                                        DropdownMenuItem(text = { Text(etiqueta) }, onClick = {
-                                            tipoDerecho = valor; expandedTipo = false
-                                            vehiculoSeleccionado = null; matriculaInvitado = ""; fechaAcceso = ""
-                                        })
-                                    }
-                                }
-                            }
-                            IconButton(onClick = { mostrarInfoTipoDerecho = true }) {
-                                Icon(Icons.Default.Info, contentDescription = "Info", tint = Color(0xFFC0392B))
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        if (tipoDerecho == "PERMANENTE") {
-                            ExposedDropdownMenuBox(expanded = expandedVehiculo, onExpandedChange = { expandedVehiculo = !expandedVehiculo }) {
-                                OutlinedTextField(value = vehiculoSeleccionado?.matricula ?: "", onValueChange = {}, readOnly = true, label = { Text(t.matricula) }, trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedVehiculo) }, modifier = Modifier.fillMaxWidth().menuAnchor(), shape = RoundedCornerShape(12.dp), colors = fieldColors)
-                                ExposedDropdownMenu(expanded = expandedVehiculo, onDismissRequest = { expandedVehiculo = false }) {
-                                    if (vehiculos.isEmpty()) {
-                                        DropdownMenuItem(text = { Text(t.sinVehiculos) }, onClick = { expandedVehiculo = false })
-                                    } else {
-                                        vehiculos.forEach { vehiculo ->
-                                            DropdownMenuItem(text = { Text("${vehiculo.matricula} — ${vehiculo.tipoAcred}") }, onClick = { vehiculoSeleccionado = vehiculo; expandedVehiculo = false })
+                        if (mostrarFormulario) {
+                            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                                ExposedDropdownMenuBox(expanded = expandedTipo, onExpandedChange = { expandedTipo = !expandedTipo }, modifier = Modifier.weight(1f)) {
+                                    OutlinedTextField(value = tipoDerecho, onValueChange = {}, readOnly = true, label = { Text(t.tipoDerecho) }, trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedTipo) }, modifier = Modifier.fillMaxWidth().menuAnchor(), shape = RoundedCornerShape(12.dp), colors = fieldColors)
+                                    ExposedDropdownMenu(expanded = expandedTipo, onDismissRequest = { expandedTipo = false }) {
+                                        listOf("PERMANENTE" to t.permanent, "PUNTUAL" to t.puntual).forEach { (valor, etiqueta) ->
+                                            DropdownMenuItem(text = { Text(etiqueta) }, onClick = {
+                                                tipoDerecho = valor; expandedTipo = false
+                                                vehiculoSeleccionado = null; matriculaInvitado = ""; fechaAcceso = ""
+                                            })
                                         }
                                     }
                                 }
-                            }
-                        } else {
-                            OutlinedTextField(value = matriculaInvitado, onValueChange = { matriculaInvitado = it.uppercase() }, label = { Text(t.matricula) }, singleLine = true, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), colors = fieldColors)
-                            Spacer(modifier = Modifier.height(10.dp))
-                            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                                OutlinedTextField(
-                                    value = if (fechaAcceso.isEmpty()) "" else { val p = fechaAcceso.split("-"); if (p.size == 3) "${p[2]}/${p[1]}/${p[0]}" else fechaAcceso },
-                                    onValueChange = {}, readOnly = true, label = { Text(t.fecha) },
-                                    trailingIcon = { IconButton(onClick = { mostrarDatePicker = true }) { Icon(Icons.Default.DateRange, contentDescription = t.fecha) } },
-                                    modifier = Modifier.weight(1f), shape = RoundedCornerShape(12.dp), colors = fieldColors
-                                )
-                                IconButton(onClick = { mostrarInfoFechaPuntual = true }) {
+                                IconButton(onClick = { mostrarInfoTipoDerecho = true }) {
                                     Icon(Icons.Default.Info, contentDescription = "Info", tint = Color(0xFFC0392B))
                                 }
                             }
-                        }
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                            Spacer(modifier = Modifier.height(12.dp))
 
-                        Button(
-                            onClick = {
-                                if (tipoDerecho == "PERMANENTE") {
-                                    vehiculoSeleccionado?.let {
-                                        viewModel.crearDerechoPermanente(it.id)
-                                        mostrarFormulario = false
-                                        vehiculoSeleccionado = null
-                                    }
-                                } else {
-                                    if (matriculaInvitado.isNotBlank() && fechaAcceso.isNotBlank()) {
-                                        viewModel.crearDerechoPuntualInvitado(matriculaInvitado, fechaAcceso)
-                                        mostrarFormulario = false
-                                        matriculaInvitado = ""
-                                        fechaAcceso = ""
+                            if (tipoDerecho == "PERMANENTE") {
+                                ExposedDropdownMenuBox(expanded = expandedVehiculo, onExpandedChange = { expandedVehiculo = !expandedVehiculo }) {
+                                    OutlinedTextField(value = vehiculoSeleccionado?.matricula ?: "", onValueChange = {}, readOnly = true, label = { Text(t.matricula) }, trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedVehiculo) }, modifier = Modifier.fillMaxWidth().menuAnchor(), shape = RoundedCornerShape(12.dp), colors = fieldColors)
+                                    ExposedDropdownMenu(expanded = expandedVehiculo, onDismissRequest = { expandedVehiculo = false }) {
+                                        if (vehiculos.isEmpty()) {
+                                            DropdownMenuItem(text = { Text(t.sinVehiculos) }, onClick = { expandedVehiculo = false })
+                                        } else {
+                                            vehiculos.forEach { vehiculo ->
+                                                DropdownMenuItem(text = { Text("${vehiculo.matricula} — ${vehiculo.tipoAcred}") }, onClick = { vehiculoSeleccionado = vehiculo; expandedVehiculo = false })
+                                            }
+                                        }
                                     }
                                 }
-                            },
-                            modifier = Modifier.fillMaxWidth().height(50.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC0392B)),
-                            enabled = if (tipoDerecho == "PERMANENTE") vehiculoSeleccionado != null else matriculaInvitado.isNotBlank() && fechaAcceso.isNotBlank()
-                        ) {
-                            Text(t.confirmar, fontWeight = FontWeight.SemiBold, color = Color.White)
-                        }
+                            } else {
+                                OutlinedTextField(value = matriculaInvitado, onValueChange = { matriculaInvitado = it.uppercase() }, label = { Text(t.matricula) }, singleLine = true, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), colors = fieldColors)
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                                    OutlinedTextField(
+                                        value = if (fechaAcceso.isEmpty()) "" else { val p = fechaAcceso.split("-"); if (p.size == 3) "${p[2]}/${p[1]}/${p[0]}" else fechaAcceso },
+                                        onValueChange = {}, readOnly = true, label = { Text(t.fecha) },
+                                        trailingIcon = { IconButton(onClick = { mostrarDatePicker = true }) { Icon(Icons.Default.DateRange, contentDescription = t.fecha) } },
+                                        modifier = Modifier.weight(1f), shape = RoundedCornerShape(12.dp), colors = fieldColors
+                                    )
+                                    IconButton(onClick = { mostrarInfoFechaPuntual = true }) {
+                                        Icon(Icons.Default.Info, contentDescription = "Info", tint = Color(0xFFC0392B))
+                                    }
+                                }
+                            }
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(16.dp))
 
-                        OutlinedButton(
-                            onClick = { mostrarFormulario = false; vehiculoSeleccionado = null; matriculaInvitado = ""; fechaAcceso = "" },
-                            modifier = Modifier.fillMaxWidth().height(50.dp),
-                            shape = RoundedCornerShape(12.dp)
-                        ) { Text(t.cancelar, color = Color(0xFFC0392B)) }
+                            Button(
+                                onClick = {
+                                    if (tipoDerecho == "PERMANENTE") {
+                                        vehiculoSeleccionado?.let {
+                                            viewModel.crearDerechoPermanente(it.id)
+                                            mostrarFormulario = false
+                                            vehiculoSeleccionado = null
+                                        }
+                                    } else {
+                                        if (matriculaInvitado.isNotBlank() && fechaAcceso.isNotBlank()) {
+                                            viewModel.crearDerechoPuntualInvitado(matriculaInvitado, fechaAcceso)
+                                            mostrarFormulario = false
+                                            matriculaInvitado = ""
+                                            fechaAcceso = ""
+                                        }
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth().height(50.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC0392B)),
+                                enabled = if (tipoDerecho == "PERMANENTE") vehiculoSeleccionado != null else matriculaInvitado.isNotBlank() && fechaAcceso.isNotBlank()
+                            ) {
+                                Text(t.confirmar, fontWeight = FontWeight.SemiBold, color = Color.White)
+                            }
 
-                    } else {
-                        Button(
-                            onClick = { mostrarFormulario = true },
-                            modifier = Modifier.fillMaxWidth().height(50.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC0392B))
-                        ) { Text(t.nouDret, fontWeight = FontWeight.SemiBold, color = Color.White) }
-                    }
-                }
-            }
-
-            when {
-                estado is EstadoUI.Loading -> {
-                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(color = Color(0xFFC0392B))
-                    }
-                }
-                derechos.isEmpty() -> {
-                    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = colorCard)) {
-                        Column(modifier = Modifier.fillMaxWidth().padding(32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(text = "🔑", fontSize = 40.sp)
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text(text = t.sinDerechos, color = colorSubtexto, fontSize = 15.sp)
+
+                            OutlinedButton(
+                                onClick = { mostrarFormulario = false; vehiculoSeleccionado = null; matriculaInvitado = ""; fechaAcceso = "" },
+                                modifier = Modifier.fillMaxWidth().height(50.dp),
+                                shape = RoundedCornerShape(12.dp)
+                            ) { Text(t.cancelar, color = Color(0xFFC0392B)) }
+
+                        } else {
+                            Button(
+                                onClick = { mostrarFormulario = true },
+                                modifier = Modifier.fillMaxWidth().height(50.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC0392B))
+                            ) { Text(t.nouDret, fontWeight = FontWeight.SemiBold, color = Color.White) }
                         }
                     }
                 }
-                else -> {
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        derechos.forEach { derecho ->
-                            DerechoCard(derecho = derecho, t = t, colorCard = colorCard, colorTexto = colorTexto, colorSubtexto = colorSubtexto)
+
+                when {
+                    derechos.isEmpty() && estado !is EstadoUI.Loading -> {
+                        Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = colorCard)) {
+                            Column(modifier = Modifier.fillMaxWidth().padding(32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(text = "🔑", fontSize = 40.sp)
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(text = t.sinDerechos, color = colorSubtexto, fontSize = 15.sp)
+                            }
+                        }
+                    }
+                    else -> {
+                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            derechos.forEach { derecho ->
+                                DerechoCard(derecho = derecho, t = t, colorCard = colorCard, colorTexto = colorTexto, colorSubtexto = colorSubtexto)
+                            }
                         }
                     }
                 }
@@ -315,7 +321,6 @@ fun DerechoCard(
             }
             Column(modifier = Modifier.weight(1f)) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    // Muestra matrícula propia o matrícula invitado
                     Text(
                         text = when {
                             derecho.matricula.isNotEmpty() -> derecho.matricula

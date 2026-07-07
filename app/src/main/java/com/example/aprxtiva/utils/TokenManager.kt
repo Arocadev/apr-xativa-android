@@ -16,22 +16,32 @@ class TokenManager(private val context: Context) {
 
     companion object {
         val TOKEN_KEY = stringPreferencesKey("token")
+        val REFRESH_TOKEN_KEY = stringPreferencesKey("refresh_token")
         val EMAIL_KEY = stringPreferencesKey("email")
         val ROL_KEY = stringPreferencesKey("rol")
         val ACTIVO_KEY = booleanPreferencesKey("activo")
     }
 
     val token: Flow<String?> = context.dataStore.data.map { it[TOKEN_KEY] }
+    val refreshToken: Flow<String?> = context.dataStore.data.map { it[REFRESH_TOKEN_KEY] }
     val email: Flow<String?> = context.dataStore.data.map { it[EMAIL_KEY] }
     val rol: Flow<String?> = context.dataStore.data.map { it[ROL_KEY] }
     val activo: Flow<Boolean> = context.dataStore.data.map { it[ACTIVO_KEY] ?: false }
 
-    suspend fun guardarSesion(token: String, email: String, rol: String, activo: Boolean) {
+    suspend fun guardarSesion(token: String, refreshToken: String, email: String, rol: String, activo: Boolean) {
         context.dataStore.edit {
             it[TOKEN_KEY] = token
+            it[REFRESH_TOKEN_KEY] = refreshToken
             it[EMAIL_KEY] = email
             it[ROL_KEY] = rol
             it[ACTIVO_KEY] = activo
+        }
+    }
+
+    suspend fun guardarToken(token: String, refreshToken: String) {
+        context.dataStore.edit {
+            it[TOKEN_KEY] = token
+            it[REFRESH_TOKEN_KEY] = refreshToken
         }
     }
 
@@ -44,6 +54,7 @@ class TokenManager(private val context: Context) {
     suspend fun cerrarSesion() {
         context.dataStore.edit {
             it.remove(TOKEN_KEY)
+            it.remove(REFRESH_TOKEN_KEY)
             it.remove(EMAIL_KEY)
             it.remove(ROL_KEY)
             it.remove(ACTIVO_KEY)

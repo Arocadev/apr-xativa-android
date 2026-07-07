@@ -7,9 +7,9 @@ import com.example.aprxtiva.entities.RegistroRequest
 import com.example.aprxtiva.entities.Usuario
 import org.json.JSONObject
 
-class AuthRepository(private val token: String? = null) {
+class AuthRepository {
 
-    private val api = RetrofitClient.getClient(token)
+    private val api = RetrofitClient.getClient()
 
     suspend fun login(dni: String, password: String): Result<LoginResponse> {
         return try {

@@ -18,9 +18,14 @@ data class LoginRequest(
 
 data class LoginResponse(
     val token: String,
+    val refreshToken: String,
     val email: String,
     val rol: String,
     val activo: Boolean = true
+)
+
+data class RefreshRequest(
+    val refreshToken: String
 )
 
 data class RegistroRequest(

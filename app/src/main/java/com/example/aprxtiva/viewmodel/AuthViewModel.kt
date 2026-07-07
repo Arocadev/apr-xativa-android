@@ -44,7 +44,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             try {
                 val token = tokenManager.token.first() ?: return@launch
-                val api = RetrofitClient.getClient(token)
+                val api = RetrofitClient.getClient(token, context)
                 val response = api.getMe()
                 if (response.isSuccessful) {
                     val usuario = response.body()!!
@@ -65,7 +65,13 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             val result = repository.login(dni, password)
             if (result.isSuccess) {
                 val response = result.getOrNull()!!
-                tokenManager.guardarSesion(response.token, response.email, response.rol, response.activo)
+                tokenManager.guardarSesion(
+                    response.token,
+                    response.refreshToken,
+                    response.email,
+                    response.rol,
+                    response.activo
+                )
                 _loginState.value = LoginState.Success(response.activo)
             } else {
                 _loginState.value = LoginState.Error(result.exceptionOrNull()?.message ?: "Error")
@@ -92,18 +98,24 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun resetLoginState() {
-        _loginState.value = LoginState.Idle
-    }
+    fun resetLoginState() { _loginState.value = LoginState.Idle }
+    fun resetRegistroState() { _registroState.value = RegistroState.Idle }
 
-    fun resetRegistroState() {
-        _registroState.value = RegistroState.Idle
-    }
-
-    fun logout() {
+    fun logout(context: Context? = null) {
         viewModelScope.launch {
-            tokenManager.cerrarSesion()
-            _loginState.value = LoginState.Idle
+            try {
+                if (context != null) {
+                    val token = tokenManager.token.first()
+                    if (token != null) {
+                        RetrofitClient.getClient(token, context).logout()
+                    }
+                }
+            } catch (e: Exception) {
+                // silencioso
+            } finally {
+                tokenManager.cerrarSesion()
+                _loginState.value = LoginState.Idle
+            }
         }
     }
 }
