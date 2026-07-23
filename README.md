@@ -2,7 +2,7 @@
 
 # APR Xàtiva — App Android
 
-**Aplicación Android para agentes de control de acceso vehicular**
+**Aplicación Android para usuarios del sistema de control de acceso vehicular**
 
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.0-purple?logo=kotlin)](https://kotlinlang.org)
 [![Jetpack Compose](https://img.shields.io/badge/Jetpack_Compose-1.6-blue?logo=jetpackcompose)](https://developer.android.com/jetpack/compose)
@@ -14,7 +14,7 @@
 
 ## ¿Qué es APR Xàtiva?
 
-APR Xàtiva es un sistema de control de acceso vehicular desarrollado como Trabajo de Fin de Grado (DAM) y adoptado por el Ajuntament de Xàtiva como propuesta técnica. Este repositorio contiene la app Android para los agentes de control — permite consultar matrículas en tiempo real y gestionar accesos desde el móvil.
+APR Xàtiva es un sistema de control de acceso vehicular desarrollado como Trabajo de Fin de Grado (DAM) y adoptado por el Ajuntament de Xàtiva como propuesta técnica. Este repositorio contiene la app Android para los usuarios — permite solicitar autorización de acceso, gestionar vehículos y consultar derechos de acceso desde el móvil.
 
 🔧 **Backend:** [github.com/ArocaDev/apr-xativa-backend](https://github.com/ArocaDev/apr-xativa-backend)  
 🌐 **Panel web:** [github.com/ArocaDev/apr-xativa-frontend](https://github.com/ArocaDev/apr-xativa-frontend)
@@ -23,14 +23,45 @@ APR Xàtiva es un sistema de control de acceso vehicular desarrollado como Traba
 
 ## ✨ Funcionalidades
 
-- **Login con JWT** y renovación automática de token
-- **Consulta de matrícula** — resultado inmediato con indicador visual de acceso permitido/denegado
-- **Historial de consultas** — registro local de los últimos accesos consultados
-- **Acceso puntual para invitados** — flujo específico con límite mensual
-- **Visibilidad de contraseña** en login
+- **Login y registro** con JWT y renovación automática de token
+- **Envío de documentación** — el usuario adjunta un justificante de residencia, trabajo o vinculación con el núcleo antiguo para solicitar autorización
+- **Estado de solicitud** en tiempo real — la app refleja el cambio sin recargar cuando el administrador aprueba o rechaza
+- **Gestión de vehículos** — añadir y eliminar matrículas autorizadas
+- **Derechos de acceso** — consulta de accesos permanentes y solicitud de accesos puntuales para invitados (límite 5/mes)
+- **Guía de uso** — onboarding para nuevos usuarios
+- **Perfil de usuario**
+- **Modo oscuro**
 - **Multiidioma** — Valenciano, Español e Inglés
-- **Gestión de errores de red** con mensajes claros al usuario
+- **Visibilidad de contraseña** en login y registro
 - **Compatibilidad** Android 8.0+
+
+---
+
+## 📸 Capturas
+
+<div align="center">
+
+| Login | Registro | Sin documentación | Con documentación |
+|:-:|:-:|:-:|:-:|
+| ![Login](assets/app-login.png) | ![Registro](assets/app-registro.png) | ![Sin doc](assets/app-no-doc.png) | ![Con doc](assets/app-si-doc.png) |
+
+| Guía de uso | Mis vehículos | Derechos de acceso | Perfil |
+|:-:|:-:|:-:|:-:|
+| ![Guía](assets/app-guia.png) | ![Vehículos](assets/app-vehiculos.png) | ![Derechos](assets/app-derechos.png) | ![Perfil](assets/app-perfil.png) |
+
+</div>
+
+---
+
+## 🎬 Demo
+
+| **Aprobación de solicitud** | **Guía de uso** |
+|:-:|:-:|
+| <img src="assets/app-doc-acept.gif" width="280" /> | <img src="assets/app-guia.gif" width="280" /> |
+
+| **Gestión de vehículos** | **Derechos de acceso** |
+|:-:|:-:|
+| <img src="assets/app-vehiculo.gif" width="280" /> | <img src="assets/app-derecho.gif" width="280" /> |
 
 ---
 
@@ -55,22 +86,14 @@ apr-xativa-android/
 ├── app/src/main/java/com/arocadev/aprxativa/
 │   ├── ui/
 │   │   ├── login/
-│   │   │   ├── LoginScreen.kt
-│   │   │   └── LoginViewModel.kt
-│   │   ├── scanner/
-│   │   │   ├── ScannerScreen.kt
-│   │   │   └── ScannerViewModel.kt
-│   │   ├── resultado/
-│   │   │   ├── ResultadoScreen.kt
-│   │   │   └── ResultadoViewModel.kt
-│   │   └── historial/
-│   │       ├── HistorialScreen.kt
-│   │       └── HistorialViewModel.kt
+│   │   ├── registro/
+│   │   ├── home/
+│   │   ├── vehiculos/
+│   │   ├── derechos/
+│   │   ├── perfil/
+│   │   └── guia/
 │   ├── data/
 │   │   ├── api/
-│   │   │   ├── ApiClient.kt
-│   │   │   ├── AuthApi.kt
-│   │   │   └── AccesoApi.kt
 │   │   ├── model/
 │   │   └── repository/
 │   └── MainActivity.kt
@@ -90,23 +113,12 @@ git clone https://github.com/ArocaDev/apr-xativa-android.git
 ```
 
 1. Abre el proyecto en Android Studio
-2. Edita `app/src/main/res/values/config.xml` con la URL del backend
+2. Edita la URL del backend en `app/src/main/res/values/config.xml`
 3. Ejecuta en emulador o dispositivo físico
 
 ### APK directa
 
 Descarga la última versión desde [Releases](https://github.com/ArocaDev/apr-xativa-android/releases).
-
----
-
-## 🔑 Configuración
-
-```xml
-<!-- app/src/main/res/values/config.xml -->
-<resources>
-    <string name="api_base_url">http://tu-servidor:8080/</string>
-</resources>
-```
 
 ---
 
@@ -122,14 +134,18 @@ Descarga la última versión desde [Releases](https://github.com/ArocaDev/apr-xa
 
 ## 🗺️ Roadmap
 
-- [x] Login con JWT y renovación automática
-- [x] Consulta de matrícula con resultado visual
-- [x] Historial de consultas
-- [x] Acceso puntual para invitados
-- [x] Visibilidad de contraseña
+- [x] Login y registro con JWT
+- [x] Envío de documentación para solicitud de acceso
+- [x] Estado de solicitud en tiempo real
+- [x] Gestión de vehículos
+- [x] Derechos de acceso permanentes y puntuales
+- [x] Guía de onboarding
+- [x] Perfil de usuario
+- [x] Modo oscuro
 - [x] Multiidioma (Valenciano / Español / Inglés)
-- [x] Gestión de errores de red
-- [x] Capturas en emulador para README
+- [x] Visibilidad de contraseña
+- [ ] Pull to refresh
+- [ ] Mejora de gestión de estados de carga
 - [x] APK en GitHub Releases
 
 ---
