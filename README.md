@@ -61,13 +61,19 @@ APR Xàtiva es un sistema de control de acceso vehicular desarrollado como Traba
 
 <img src="assets/app-doc-acept.gif" width="300" />
 
+---
+
 **Guía de uso**
 
 <img src="assets/app-guia.gif" width="300" />
 
+---
+
 **Gestión de vehículos**
 
 <img src="assets/app-vehiculo.gif" width="300" />
+
+---
 
 **Derechos de acceso**
 
@@ -158,7 +164,7 @@ Descarga la última versión desde [Releases](https://github.com/ArocaDev/apr-xa
 - [x] Visibilidad de contraseña
 - [ ] Pull to refresh
 - [ ] Mejora de gestión de estados de carga
-- [x] APK en GitHub Releases
+- [ ] APK en GitHub Releases
 
 ---
 
