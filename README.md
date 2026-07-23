@@ -55,13 +55,25 @@ APR Xàtiva es un sistema de control de acceso vehicular desarrollado como Traba
 
 ## 🎬 Demo
 
-| **Aprobación de solicitud** | **Guía de uso** |
-|:-:|:-:|
-| <img src="assets/app-doc-acept.gif" width="280" /> | <img src="assets/app-guia.gif" width="280" /> |
+<div align="center">
 
-| **Gestión de vehículos** | **Derechos de acceso** |
-|:-:|:-:|
-| <img src="assets/app-vehiculo.gif" width="280" /> | <img src="assets/app-derecho.gif" width="280" /> |
+**Aprobación de solicitud**
+
+<img src="assets/app-doc-acept.gif" width="300" />
+
+**Guía de uso**
+
+<img src="assets/app-guia.gif" width="300" />
+
+**Gestión de vehículos**
+
+<img src="assets/app-vehiculo.gif" width="300" />
+
+**Derechos de acceso**
+
+<img src="assets/app-derecho.gif" width="300" />
+
+</div>
 
 ---
 
